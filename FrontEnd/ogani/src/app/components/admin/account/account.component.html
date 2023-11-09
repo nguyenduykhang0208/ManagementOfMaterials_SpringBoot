@@ -1,0 +1,245 @@
+<p-toast></p-toast>
+
+<div class="card">
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="left">
+      <button
+        pButton
+        pRipple
+        label="Thêm tài khoản"
+        icon="pi pi-plus"
+        class="p-button-success mr-2"
+        (click)="openNew()"
+        *ngIf="userRole === 'ROLE_ADMIN'"
+      ></button>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    #dt
+    [value]="listUser"
+    [rows]="6"
+    [paginator]="true"
+    [globalFilterFields]="['username', 'firstname', 'lastname', 'email']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    [showCurrentPageReport]="userRole === 'ROLE_ADMIN' ? true : false"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex align-items-center justify-content-between">
+        <h5 class="m-0">Quản lý vật liệu</h5>
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            placeholder="Tìm kiếm"
+          />`
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th>
+          <!-- <p-tableHeaderCheckbox></p-tableHeaderCheckbox> -->
+        </th>
+        <th pSortableColumn="username" style="min-width: 15rem">
+          Tài khoản <p-sortIcon field="username"></p-sortIcon>
+        </th>
+        <th pSortableColumn="firstname">
+          Họ tên <p-sortIcon field="firstname"></p-sortIcon>
+        </th>
+        <th pSortableColumn="email" style="min-width: 10rem">
+          Email <p-sortIcon field="email"></p-sortIcon>
+        </th>
+        <th>Trạng thái</th>
+        <th style="min-width: 10rem"></th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-user>
+      <tr *ngFor="let i of user.roles">
+        <td *ngIf="userRole === 'ROLE_ADMIN' || i.name !== 'ROLE_ADMIN'">
+          <p-tableCheckbox [value]="user"></p-tableCheckbox>
+        </td>
+        <td *ngIf="userRole === 'ROLE_ADMIN' || i.name !== 'ROLE_ADMIN'">
+          {{ user.username }}
+        </td>
+        <td *ngIf="userRole === 'ROLE_ADMIN' || i.name !== 'ROLE_ADMIN'">
+          {{ user.firstname }} {{ user.lastname }}
+        </td>
+        <td *ngIf="userRole === 'ROLE_ADMIN' || i.name !== 'ROLE_ADMIN'">
+          {{ user.email }}
+        </td>
+        <td *ngIf="userRole === 'ROLE_ADMIN' || i.name !== 'ROLE_ADMIN'">
+          <button
+            pButton
+            type="button"
+            class="p-button-info"
+            (click)="enableUser(user.id)"
+            *ngIf="
+              userRole === 'ROLE_ADMIN'
+                ? user.enable &&
+                  !(user.id !== userId && user.roles[0].name === 'ROLE_ADMIN')
+                : userRole === 'ROLE_ADMIN'
+            "
+          >
+            Enabled
+          </button>
+          <button
+            pButton
+            type="button"
+            class="p-button-warning"
+            (click)="enableUser(user.id)"
+            *ngIf="
+              userRole === 'ROLE_ADMIN'
+                ? !user.enable &&
+                  !(user.id !== userId && user.roles[0].name === 'ROLE_ADMIN')
+                : userRole === 'ROLE_ADMIN'
+            "
+          >
+            Disabled
+          </button>
+          <span
+            *ngIf="
+              userRole === 'ROLE_ADMIN'
+                ? user.id !== userId &&
+                  user.roles[0].name === 'ROLE_ADMIN' &&
+                  user.enable
+                : user.enable && userRole !== 'ROLE_ADMIN'
+            "
+            >Enabled</span
+          >
+          <span
+            *ngIf="
+              userRole === 'ROLE_ADMIN'
+                ? user.id !== userId &&
+                  user.roles[0].name === 'ROLE_ADMIN' &&
+                  !user.enable
+                : !user.enable && userRole !== 'ROLE_ADMIN'
+            "
+            >Disabled</span
+          >
+        </td>
+        <td *ngIf="userRole === 'ROLE_ADMIN' || i.name !== 'ROLE_ADMIN'">
+          <div *ngFor="let item of user.roles">
+            <button
+              pButton
+              pRipple
+              icon="pi pi-pencil"
+              class="p-button-rounded p-button-success mr-2"
+              [routerLink]="['/admin/account', user.id]"
+            ></button>
+            <button
+              pButton
+              pRipple
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-warning"
+              *ngIf="
+                userRole === 'ROLE_ADMIN'
+                  ? !(user.id !== userId && item.name === 'ROLE_ADMIN')
+                  : !(user.id !== userId || item.name === 'ROLE_ADMIN')
+              "
+              (click)="onDelete(user.id, user.username)"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="summary">
+      <div class="flex align-items-center justify-content-between">
+        <!-- In total there are {{products ? products.length : 0 }} products. -->
+      </div>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [(visible)]="showForm"
+  [style]="{ width: '30vw' }"
+  header="Product Details"
+  [modal]="true"
+  styleClass="p-fluid"
+>
+  <ng-template pTemplate="content">
+    <div class="field">
+      <label for="username">Tên tài khoản</label>
+      <input
+        type="text"
+        pInputText
+        id="username"
+        [(ngModel)]="userForm.username"
+        required
+        autofocus
+      />
+    </div>
+    <div class="field">
+      <label for="email">Email</label>
+      <input
+        type="text"
+        pInputText
+        id="email"
+        [(ngModel)]="userForm.email"
+        required
+        autofocus
+      />
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input
+        type="text"
+        pInputText
+        id="password"
+        [(ngModel)]="userForm.password"
+        required
+        autofocus
+      />
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button type="submit" pButton (click)="createAccount()">Tạo mới</button>
+    <button
+      pButton
+      type="button"
+      class="p-button-danger ml-3"
+      (click)="showForm = false"
+    >
+      Hủy
+    </button>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="Xác nhận"
+  [(visible)]="showDelete"
+  [style]="{ width: '30vw' }"
+  [modal]="true"
+  [transitionOptions]="'.3s'"
+>
+  <div>
+    <i class="pi pi pi-exclamation-triangle"></i>
+    <span class="ml-2"
+      >Bạn có chắc xóa tài khoản người dùng
+      <span>{{ userForm.username }}</span> này ?</span
+    >
+  </div>
+  <div class="flex justify-content-end mt-3">
+    <p-button
+      label="Yes"
+      icon="pi pi-check"
+      class="mr-2"
+      (click)="deleteUser()"
+    ></p-button>
+    <p-button
+      label="No"
+      icon="pi pi-times"
+      (click)="showDelete = false"
+    ></p-button>
+  </div>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>

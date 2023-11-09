@@ -1,0 +1,124 @@
+<div>
+  <div class="d-flex flex-column" id="content-wrapper">
+    <div id="content">
+      <div class="container-fluid">
+        <h3>
+          <button class="border-0" color="primary" (click)="goBack()">
+            <!-- <mat-icon>home</mat-icon> -->
+            <i class="fas fa-backward icon-back-size"></i>
+          </button>
+          Chi tiết đơn hàng xuất
+        </h3>
+        <div>
+          <div class="card shadow mb-5">
+            <div class="card-body">
+              <div class="row">
+                <div class="col">
+                  <div class="form-group">
+                    <label for="deliveryNoteId">
+                      <strong>Mã đơn hàng</strong><br />
+                    </label>
+                    <div class="form-control">{{ deliveryNoteId }}</div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="firstName">
+                      <strong>Họ tên khách</strong><br />
+                    </label>
+                    <div class="form-control">
+                      {{ orderForm.firstname }} {{ orderForm.lastname }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <div class="form-group">
+                    <label for="totalPrice">
+                      <strong>Tổng tiền</strong><br />
+                    </label>
+                    <div class="form-control">{{ orderForm.totalPrice }}</div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="phone">
+                      <strong>Số điện thoại</strong><br />
+                    </label>
+                    <div class="form-control">{{ orderForm.phone }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <div class="form-group">
+                    <label for="date"> <strong>Ngày tạo</strong><br /> </label>
+                    <div class="form-control">
+                      {{ orderForm.date | date : "MM/dd/yyyy" }}
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="email"> <strong>Email</strong><br /> </label>
+                    <div class="form-control">{{ orderForm.email }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <div class="form-group">
+                    <label for="firstName">
+                      <strong>Trạng thái</strong><br />
+                    </label>
+                    <div class="form-control">
+                      {{
+                        orderForm.enable ? "Đơn hàng đã duyệt" : "Chờ xác nhận"
+                      }}
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-group">
+                    <label for="firstName"> <strong></strong><br /> </label>
+                    <div class="form-control hidden"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-3">
+                <div class="flex align-items-center justify-content-between">
+                  <h3 class="m-0">Danh sách sản phẩm</h3>
+                </div>
+                <div class="container">
+                  <table class="table">
+                    <thead>
+                      <tr class="row">
+                        <th class="col-1">#</th>
+                        <th class="col-5">Tên sản phẩm</th>
+                        <th class="col-2">Gía</th>
+                        <th class="col-2">Số lượng</th>
+                        <th class="col-2">Thành tiền</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container *ngFor="let item of listDetail">
+                        <tr class="row">
+                          <td class="col-1">{{ item.id }}</td>
+                          <td class="col-5">{{ item.name }}</td>
+                          <td class="col-2">{{ item.price }}</td>
+                          <td class="col-2">{{ item.quantity }}</td>
+                          <td class="col-2">{{ item.subTotal }}</td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

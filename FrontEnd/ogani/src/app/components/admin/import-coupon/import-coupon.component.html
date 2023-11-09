@@ -1,0 +1,262 @@
+<div class="card">
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="left">
+      <button
+        pButton
+        pRipple
+        label="Thêm phiếu nhập hàng"
+        icon="pi pi-plus"
+        class="p-button-success mr-2"
+        (click)="openNew()"
+      ></button>
+    </ng-template>
+  </p-toolbar>
+  <p-table
+    #dt
+    [value]="listImportCoupon"
+    [rows]="10"
+    [paginator]="true"
+    [globalFilterFields]="['id', 'supplierId', 'date', 'status']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    [showCurrentPageReport]="true"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex align-items-center justify-content-between">
+        <h5 class="m-0">Manage Import Coupon</h5>
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            placeholder="Tìm kiếm"
+          />`
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 4rem">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th pSortableColumn="id">
+          Mã phiếu nhập <p-sortIcon field="id"></p-sortIcon>
+        </th>
+        <th pSortableColumn="userId">
+          Mã nhân viên<p-sortIcon field="userId"></p-sortIcon>
+        </th>
+        <th pSortableColumn="supplierId">
+          Mã nhà cung câp <p-sortIcon field="supplierId"></p-sortIcon>
+        </th>
+        <th pSortableColumn="date">
+          Ngày nhập <p-sortIcon field="date"></p-sortIcon>
+        </th>
+        <th pSortableColumn="totalPrice">
+          Tổng giá <p-sortIcon field="totalPrice"></p-sortIcon>
+        </th>
+        <th>Trạng thái</th>
+        <th style="min-width: 10rem">Action</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-importCoupon>
+      <tr>
+        <td style="width: 4rem">
+          <p-tableCheckbox [value]="importCoupon"></p-tableCheckbox>
+        </td>
+        <td>{{ importCoupon.id }}</td>
+        <td>{{ importCoupon.users.id }}</td>
+        <td>{{ importCoupon.supplier.id }}</td>
+        <td>{{ importCoupon.date | date : "yyyy-MM-dd" }}</td>
+        <td>{{ importCoupon.totalPrice }}</td>
+        <td>
+          <button
+            pButton
+            type="button"
+            class="p-button-info"
+            (click)="enableImportCoupon(importCoupon.id)"
+            *ngIf="!importCoupon.enable"
+          >
+            Chờ xác nhận
+          </button>
+          <span *ngIf="importCoupon.enable">Đã xác nhận</span>
+        </td>
+        <td>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-search"
+            class="p-button-rounded p-button-primary"
+            (click)="toImportCouponDetail(importCoupon.id)"
+          ></button>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-trash"
+            *ngIf="userRole === 'ROLE_ADMIN'"
+            class="p-button-rounded p-button-danger ml-2"
+            (click)="onDelete(importCoupon.id)"
+          ></button>
+          <p-dialog
+            header="Xác nhận"
+            [(visible)]="deleteForm"
+            [style]="{ width: '30vw' }"
+            [modal]="true"
+            [transitionOptions]="'.3s'"
+          >
+            <div>
+              <i class="pi pi pi-exclamation-triangle"></i>
+              <span class="ml-2"
+                >Bạn có chắc xóa đơn hàng nhập:
+                <span>{{ importCoupon.id }}</span> ?</span
+              >
+            </div>
+            <div class="flex justify-content-end mt-3">
+              <p-button
+                label="Yes"
+                icon="pi pi-check"
+                class="mr-2"
+                (click)="deleteImportCoupon(importCoupon.id)"
+              ></p-button>
+              <p-button
+                label="No"
+                icon="pi pi-times"
+                (click)="deleteForm = false"
+              ></p-button>
+            </div>
+          </p-dialog>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [(visible)]="showForm"
+  [style]="{ width: '30vw' }"
+  header="Import Coupon Details"
+  [modal]="true"
+  styleClass="p-fluid"
+>
+  <ng-template pTemplate="content">
+    <!-- <div class="field">
+      <label for="name">Nhà cung cấp</label>
+      <input type="text" pInputText id="supplierId" required autofocus />
+    </div> -->
+    <div class="field">
+      <label for="supplierId">Nhà cung cấp</label>
+      <select
+        id="supplierId"
+        pInputText
+        required
+        autofocus
+        [(ngModel)]="importCouponForm.supplier_id"
+      >
+        <option value="">Chọn nhà cung cấp</option>
+        <option *ngFor="let supplier of listSupplier" [value]="supplier.id">
+          {{ supplier.name }}
+        </option>
+      </select>
+    </div>
+    <div class="row mt-1" *ngIf="listDetailCreate != null">
+      <div class="" *ngFor="let item of listDetailCreate">
+        Mã sản phẩm:{{ item.product_id }} - Số lượng:{{ item.quantity }} - Gía
+        tiền: {{ item.unit_price | number : "1.2-2" }}
+      </div>
+    </div>
+    <div class="field row">
+      <button class="w-auto" type="submit" pButton (click)="createNew()">
+        Tạo mới
+      </button>
+      <button
+        pButton
+        type="button"
+        class="p-button-success w-auto"
+        (click)="onShowDetail()"
+        styleClass="h-auto"
+      >
+        Chi tiết phiếu nhập
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="Chọn ảnh"
+  [(visible)]="showDetail"
+  [style]="{ width: '30vw' }"
+  header="Import Coupon Details"
+  [modal]="true"
+  styleClass="p-fluid"
+  [transitionOptions]="'.3s'"
+>
+  <div>
+    <label for="supplierId">Sản phẩm</label>
+    <select
+      id="supplierId"
+      pInputText
+      required
+      autofocus
+      [(ngModel)]="importCouponDetailForm.product_id"
+      (ngModelChange)="
+        importCouponDetailForm.product_id = $event; onChangeProduct()
+      "
+    >
+      <option value="">Chọn sản phẩm</option>
+      <option *ngFor="let product of listProduct" [value]="product.id">
+        {{ product.name }}
+      </option>
+    </select>
+  </div>
+  <div>
+    <label for="supplierId">Số lượng</label>
+    <input
+      type="number"
+      [(ngModel)]="importCouponDetailForm.quantity"
+      class="w-full"
+      name="quantity"
+    />
+  </div>
+  <div>
+    <label for="supplierId">Đơn giá</label>
+    <input
+      type="number"
+      [(ngModel)]="importCouponDetailForm.unit_price"
+      class="w-full"
+      name="unit_price"
+    />
+  </div>
+  <div class="row mt-1" *ngIf="listDetailCreate != null">
+    <div class="" *ngFor="let item of listDetailCreate">
+      Mã sản phẩm:{{ item.product_id }} - Số lượng:{{ item.quantity }} - Gía
+      tiền: {{ item.unit_price | number : "1.2-2" }}
+      <button
+        icon="pi pi-trash p-button-danger"
+        (click)="deleteItemDetail(item)"
+      ></button>
+    </div>
+  </div>
+  <div class="mt-2">
+    <button
+      type="submit"
+      pButton
+      (click)="addDetails()"
+      class="p-button-primary w-auto"
+      label="Thêm"
+    ></button>
+    <button
+      pButton
+      (click)="saveDetails()"
+      class="p-button-success w-auto"
+      label="Save"
+    ></button>
+    <button
+      pButton
+      class="p-button-danger w-auto"
+      label="Hủy"
+      (click)="deleteDetail()"
+    ></button>
+  </div>
+</p-dialog>

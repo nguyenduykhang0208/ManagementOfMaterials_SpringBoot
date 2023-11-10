@@ -33,7 +33,7 @@ public class CreateUserRequest {
 
     @NotNull(message="Mật khẩu rỗng")
     @NotEmpty(message="Mật khẩu rỗng")
-    @Size(min=6,max=30,message="Mật khẩu từ 6-30 ký tự")
+    @Size(min=5,max=30,message="Mật khẩu từ 5-30 ký tự")
     @Schema(description="Mật khẩu",example="123456")
     private String password;
 

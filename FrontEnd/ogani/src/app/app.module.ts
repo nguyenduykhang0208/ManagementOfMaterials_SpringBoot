@@ -52,6 +52,7 @@ import { DeliveryNoteComponent } from './components/admin/delivery-note/delivery
 import { DeliveryNoteDetailComponent } from './components/admin/delivery-note-detail/delivery-note-detail.component';
 import { SupplierComponent } from './components/admin/supplier/supplier.component';
 import { AccountInfoComponent } from './components/admin/account-info/account-info.component';
+import { ReactiveFormsModule } from '@angular/forms';
 @NgModule({
   declarations: [
     AppComponent,
@@ -108,6 +109,7 @@ import { AccountInfoComponent } from './components/admin/account-info/account-in
     SliderModule,
     DataViewModule,
     MultiSelectModule,
+    ReactiveFormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

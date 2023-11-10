@@ -34,39 +34,102 @@
       </div>
     </p-tabPanel>
     <p-tabPanel header="Đăng ký">
-      <form action="">
+      <form action="" [formGroup]="registerForm" (ngSubmit)="register()">
         <div class="p-field">
           <label for="username">Tên đăng nhập: </label>
-          <input
+          <!-- <input
             type="text"
             pInputText
             class="w-full"
             [(ngModel)]="registerForm.username"
             name="username"
+          /> -->
+          <input
+            class="form-control"
+            type="text"
+            pInputText
+            class="w-full"
+            formControlName="username"
+            name="username"
+            [ngClass]="{
+              'is-invalid': submitted && registerForm.get('username')?.invalid
+            }"
           />
+          <div
+            class="invalid-feedback"
+            *ngIf="submitted && registerForm.get('username')?.invalid"
+          >
+            <div *ngIf="registerForm.get('username')?.errors?.['required']">
+              Yêu lòng nhập tài khoản của bạn
+            </div>
+            <div *ngIf="registerForm.get('username')?.errors?.['minlength']">
+              Độ dài tối thiểu phải là 5
+            </div>
+            <div *ngIf="registerForm.get('username')?.errors?.['maxlength']">
+              Độ dài tối đa phải là 30
+            </div>
+          </div>
+          <div *ngIf=""></div>
         </div>
         <div class="p-field">
           <label for="email">Email: </label>
           <input
+            class="form-control"
             type="email"
             pInputText
             class="w-full"
-            [(ngModel)]="registerForm.email"
+            formControlName="email"
             name="email"
+            [ngClass]="{
+              'is-invalid': submitted && registerForm.get('email')?.invalid
+            }"
           />
+          <div
+            class="invalid-feedback"
+            *ngIf="submitted && registerForm.get('email')?.invalid"
+          >
+            <div *ngIf="registerForm.get('email')?.errors?.['required']">
+              Yêu lòng nhập Email
+            </div>
+            <div *ngIf="registerForm.get('email')?.errors?.['minlength']">
+              Độ dài tối thiểu phải là 5
+            </div>
+            <div *ngIf="registerForm.get('email')?.errors?.['maxlength']">
+              Độ dài tối đa phải là 30
+            </div>
+          </div>
         </div>
         <div class="p-field">
           <label for="password">Mật khẩu: </label>
           <input
+            class="form-control"
             type="password"
             pPassword
             class="w-full"
-            [(ngModel)]="registerForm.password"
+            formControlName="password"
             name="password"
+            [ngClass]="{
+              'is-invalid': submitted && registerForm.get('password')?.invalid
+            }"
           />
+          <div
+            class="invalid-feedback"
+            *ngIf="submitted && registerForm.get('password')?.invalid"
+          >
+            <div *ngIf="registerForm.get('password')?.errors?.['required']">
+              Yêu lòng nhập mật khẩu
+            </div>
+            <div *ngIf="registerForm.get('password')?.errors?.['minlength']">
+              Độ dài tối thiểu phải là 5
+            </div>
+            <div *ngIf="registerForm.get('password')?.errors?.['maxlength']">
+              Độ dài tối đa phải là 30
+            </div>
+          </div>
         </div>
         <div class="p-field mt-3">
-          <button type="submit" pButton (click)="register()">Đăng ký</button>
+          <!-- <button type="submit" pButton (click)="register()">Đăng ký</button> -->
+          <button type="submit" pButton>Đăng ký</button>
         </div>
       </form>
     </p-tabPanel>
@@ -80,7 +143,8 @@
         <div class="col-lg-6 col-md-6">
           <div class="header__top__left">
             <ul>
-              <li><i class="fa fa-envelope"></i> hello@gmail.com</li>
+              <!-- <li><i class="fa fa-envelope"></i> hello@gmail.com</li> -->
+              <li><i class="fa fa-envelope"></i></li>
               <li>Free Shipping for all Order of $99</li>
             </ul>
           </div>
@@ -345,7 +409,8 @@
           <ul>
             <li>Địa chỉ: 01 Công xã Paris, Bến Nghé, Q.1, Tp. HCM</li>
             <li>Phone: 111</li>
-            <li>Email: hello@gmail.com</li>
+            <!-- <li>Email: hello@gmail.com</li> -->
+            <li></li>
           </ul>
         </div>
       </div>

@@ -5,6 +5,7 @@ import {
   ChangeDetectorRef,
   AfterContentChecked,
 } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { text } from '@fortawesome/fontawesome-svg-core';
 import {
@@ -37,6 +38,7 @@ export class IndexComponent implements OnInit {
   userIcon = faUser;
   logoutIcon = faRightFromBracket;
   bars = faBars;
+  submitted = false;
 
   showDepartment = false;
 
@@ -45,11 +47,30 @@ export class IndexComponent implements OnInit {
     password: null,
   };
 
-  registerForm: any = {
-    username: null,
-    email: null,
-    password: null,
-  };
+  // registerForm: any = {
+  //   username: null,
+  //   email: null,
+  //   password: null,
+  // };
+
+  registerForm = new FormGroup({
+    username: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(30),
+    ]),
+    email: new FormControl('', [
+      Validators.required,
+      Validators.email,
+      Validators.minLength(5),
+      Validators.maxLength(30),
+    ]),
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+      Validators.maxLength(30),
+    ]),
+  });
 
   isSuccessful = false;
   isSignUpFailed = false;
@@ -80,9 +101,7 @@ export class IndexComponent implements OnInit {
     this.isLoggedIn = this.storageService.isLoggedIn();
     this.wishlistService.loadWishList();
     this.cartService.loadCart();
-    this.http.get('http://localhost:8080/hello/').subscribe((res) => {
-      // console.log(res);
-    });
+    this.http.get('http://localhost:8080/hello/').subscribe((res) => {});
   }
 
   showDepartmentClick() {
@@ -112,7 +131,12 @@ export class IndexComponent implements OnInit {
     if (!this.isLoggedIn) {
       this.authModal = true;
       this.loginForm = { username: null, password: null };
-      this.registerForm = { username: null, email: null, password: null };
+      // this.registerForm = { username: null, email: null, password: null };
+      this.registerForm.setValue({
+        username: null,
+        email: null,
+        password: null,
+      });
     }
   }
 
@@ -138,8 +162,11 @@ export class IndexComponent implements OnInit {
   }
 
   register(): void {
-    const { username, email, password } = this.registerForm;
-    console.log(this.registerForm);
+    // const { username, email, password } = this.registerForm;
+    this.submitted = true;
+    const username = this.registerForm.get('username')?.value || '';
+    const email = this.registerForm.get('email')?.value || '';
+    const password = this.registerForm.get('password')?.value || '';
     this.authService.register(username, email, password).subscribe({
       next: (res) => {
         this.isSuccessful = true;
@@ -148,7 +175,6 @@ export class IndexComponent implements OnInit {
         this.authModal = false;
       },
       error: (err) => {
-        this.showError(err.message);
         this.errorMessage = err.error.message;
         this.isSignUpFailed = true;
       },

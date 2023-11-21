@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
@@ -33,31 +34,26 @@ import com.example.ogani.model.request.PaymentRequest;
 @RequestMapping("/api/payment")
 @CrossOrigin(origins = "*",maxAge = 3600)
 public class PaymentController {
-    
+//    @RequestParam("total") long total
     @GetMapping("/create_payment")
-    public String createPayment(@RequestParam("total") long total, HttpServletResponse resp) throws UnsupportedEncodingException{
+    public String createPayment(HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException{
         
          String orderType = "other";
-        // long amount = Integer.parseInt(req.getParameter("amount"))*100;
+         long amount = Integer.parseInt(req.getParameter("amount"))*100;
         // String bankCode = req.getParameter("bankCode");
 
-        // long amount = 10000;
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
-        // long amount = total*100;
-        long amount = total*100000;
-        String bankCode = "NCB";
+//        String bankCode = "NCB";
         
         String vnp_TxnRef = PaymentConfig.getRandomNumber(8);
-        // String vnp_IpAddr = PaymentConfig.getIpAddress(req);
-         String vnp_IpAddr = "127.0.0.1";
+         String vnp_IpAddr = PaymentConfig.getIpAddress(req);
+//         String vnp_IpAddr = "127.0.0.1";
 
 
         String vnp_TmnCode = PaymentConfig.vnp_TmnCode;
         
         Map<String, String> vnp_Params = new HashMap<>();
-        // vnp_Params.put("vnp_Version", PaymentConfig.vnp_Version);
-        // vnp_Params.put("vnp_Command", PaymentConfig.vnp_Command);
         vnp_Params.put("vnp_Version", vnp_Version);
         vnp_Params.put("vnp_Command", vnp_Command);
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
@@ -119,38 +115,20 @@ public class PaymentController {
         return paymentUrl;
     }
     @GetMapping("payment-callback")
-    public ResponseEntity<Boolean> paymentCallback(@RequestParam Map<String, String> queryParams,HttpServletResponse response) throws IOException{
+    public ResponseEntity<Boolean> paymentCallback(@RequestParam Map<String, String> queryParams,HttpServletResponse response) throws IOException {
         String vnp_ResponseCode = queryParams.get("vnp_ResponseCode");
         boolean paymentSuccess;
-            if ("00".equals(vnp_ResponseCode)) {
-                response.sendRedirect("http://localhost:4200/checkout?paymentStatus=success");
-                paymentSuccess = true;
-            } else if ("24".equals(vnp_ResponseCode)){
-                response.sendRedirect("http://localhost:4200/checkout");
-                paymentSuccess = false;
-            } else {
-                response.sendRedirect("http://localhost:4200/checkout");
-                paymentSuccess = false;
-                
-            }
-            return ResponseEntity.ok(paymentSuccess);
-    }
-    // @GetMapping("payment-callback")
-    // public ResponseEntity<Map<String, Object>> paymentCallback(@RequestParam Map<String, String> queryParams, HttpServletResponse response) throws IOException {
-    //     String vnp_ResponseCode = queryParams.get("vnp_ResponseCode");
-    //     Map<String, Object> result = new HashMap<>();
-    
-    //     if ("00".equals(vnp_ResponseCode)) {
-    //         result.put("status", "success");
-    //         result.put("redirectUrl", "http://localhost:4200/checkout");
-    //     } else if ("24".equals(vnp_ResponseCode)) {
-    //         result.put("status", "failure");
-    //         result.put("redirectUrl", "http://localhost:4200");
-    //     } else {
-    //         result.put("status", "failure");
-    //         result.put("redirectUrl", "http://localhost:4200");
-    //     }
+        if ("00".equals(vnp_ResponseCode)) {
+            response.sendRedirect("http://localhost:4200/checkout?paymentStatus=success");
+            paymentSuccess = true;
+        } else if ("24".equals(vnp_ResponseCode)) {
+            response.sendRedirect("http://localhost:4200/checkout");
+            paymentSuccess = false;
+        } else {
+            response.sendRedirect("http://localhost:4200/checkout");
+            paymentSuccess = false;
 
-    //     return ResponseEntity.ok(result);
-    // }
+        }
+        return ResponseEntity.ok(paymentSuccess);
+    }
 }

@@ -110,7 +110,7 @@
               <i class="pi pi pi-exclamation-triangle"></i>
               <span class="ml-2"
                 >Bạn có chắc xóa đơn hàng nhập:
-                <span>{{ importCoupon.id }}</span> ?</span
+                <span>{{ importCouponId }}</span> ?</span
               >
             </div>
             <div class="flex justify-content-end mt-3">
@@ -118,7 +118,7 @@
                 label="Yes"
                 icon="pi pi-check"
                 class="mr-2"
-                (click)="deleteImportCoupon(importCoupon.id)"
+                (click)="deleteImportCoupon()"
               ></p-button>
               <p-button
                 label="No"
@@ -136,55 +136,241 @@
 <p-dialog
   [(visible)]="showForm"
   [style]="{ width: '30vw' }"
-  header="Import Coupon Details"
+  header="Tạo phiếu nhập"
   [modal]="true"
   styleClass="p-fluid"
 >
   <ng-template pTemplate="content">
-    <!-- <div class="field">
-      <label for="name">Nhà cung cấp</label>
-      <input type="text" pInputText id="supplierId" required autofocus />
-    </div> -->
-    <div class="field">
-      <label for="supplierId">Nhà cung cấp</label>
+    <form action="" [formGroup]="importCouponForm">
+      <div class="field">
+        <label for="supplierId">Nhà cung cấp</label>
+        <select
+          id="supplierId"
+          pInputText
+          required
+          autofocus
+          formControlName="supplier_id"
+          [ngClass]="{
+            'is-invalid':
+              submitted && importCouponForm.get('supplier_id')?.invalid
+          }"
+        >
+          <option *ngFor="let supplier of listSupplier" [value]="supplier.id">
+            {{ supplier.name }}
+          </option>
+        </select>
+        <div
+          class="invalid-feedback"
+          *ngIf="submitted && importCouponForm.get('supplier_id')?.invalid"
+        >
+          <div
+            *ngIf="importCouponForm.get('supplier_id')?.errors?.['required']"
+          >
+            Yêu lòng chọn nhà cung cấp
+          </div>
+        </div>
+      </div>
+      <div class="row mt-1" *ngIf="listDetailCreate != null">
+        <div class="" *ngFor="let item of listDetailCreate">
+          Mã sản phẩm:{{ item.product_id }} - Số lượng:{{ item.quantity }} - Gía
+          tiền: {{ item.unit_price | number : "1.2-2" }}
+        </div>
+      </div>
+      <div class="field row">
+        <button class="w-auto" type="submit" pButton (click)="createNew()">
+          Tạo mới
+        </button>
+        <button
+          pButton
+          type="button"
+          class="p-button-success w-auto"
+          (click)="onShowDetail()"
+          styleClass="h-auto"
+        >
+          Chi tiết phiếu nhập
+        </button>
+      </div>
+    </form>
+  </ng-template>
+</p-dialog>
+
+<p-dialog
+  header="Chọn sản phẩm"
+  [(visible)]="showDetail"
+  [style]="{ width: '30vw' }"
+  header="Thêm chi tiết phiếu nhập"
+  [modal]="true"
+  styleClass="p-fluid"
+  [transitionOptions]="'.3s'"
+>
+  <form action="" [formGroup]="importCouponDetailForm">
+    <div>
+      <label for="supplierId">Sản phẩm</label>
       <select
         id="supplierId"
         pInputText
         required
         autofocus
-        [(ngModel)]="importCouponForm.supplier_id"
+        formControlName="product_id"
+        [ngClass]="{
+          'is-invalid':
+            submitted && importCouponDetailForm.get('product_id')?.invalid
+        }"
       >
-        <option value="">Chọn nhà cung cấp</option>
-        <option *ngFor="let supplier of listSupplier" [value]="supplier.id">
-          {{ supplier.name }}
+        <option value="">Chọn sản phẩm</option>
+        <option *ngFor="let product of listProduct" [value]="product.id">
+          {{ product.name }}
         </option>
       </select>
+      <div
+        class="invalid-feedback"
+        *ngIf="submitted && importCouponDetailForm.get('product_id')?.invalid"
+      >
+        <div
+          *ngIf="importCouponDetailForm.get('product_id')?.errors?.['required']"
+        >
+          Yêu lòng nhập đơn vị của vật liệu
+        </div>
+      </div>
+    </div>
+    <div>
+      <label for="supplierId">Số lượng</label>
+      <input
+        class="form-control"
+        type="number"
+        formControlName="quantity"
+        class="w-full"
+        name="quantity"
+        [ngClass]="{
+          'is-invalid':
+            submitted && importCouponDetailForm.get('quantity')?.invalid
+        }"
+      />
+      <div
+        class="invalid-feedback"
+        *ngIf="submitted && importCouponDetailForm.get('quantity')?.invalid"
+      >
+        <div
+          *ngIf="importCouponDetailForm.get('quantity')?.errors?.['required']"
+        >
+          Yêu lòng nhập số lượng của vật liệu
+        </div>
+        <div *ngIf="importCouponDetailForm.get('quantity')?.errors?.['min']">
+          Số lượng không dược nhỏ hơn 0
+        </div>
+      </div>
+    </div>
+    <div>
+      <label for="supplierId">Đơn giá</label>
+      <input
+        class="form-control"
+        type="number"
+        formControlName="unit_price"
+        class="w-full"
+        name="unit_price"
+        [ngClass]="{
+          'is-invalid':
+            submitted && importCouponDetailForm.get('unit_price')?.invalid
+        }"
+      />
+      <div
+        class="invalid-feedback"
+        *ngIf="submitted && importCouponDetailForm.get('unit_price')?.invalid"
+      >
+        <div
+          *ngIf="importCouponDetailForm.get('unit_price')?.errors?.['required']"
+        >
+          Yêu lòng nhập số lượng của vật liệu
+        </div>
+        <div *ngIf="importCouponDetailForm.get('unit_price')?.errors?.['min']">
+          Số lượng không dược nhỏ hơn 0
+        </div>
+      </div>
     </div>
     <div class="row mt-1" *ngIf="listDetailCreate != null">
       <div class="" *ngFor="let item of listDetailCreate">
         Mã sản phẩm:{{ item.product_id }} - Số lượng:{{ item.quantity }} - Gía
         tiền: {{ item.unit_price | number : "1.2-2" }}
+        <button
+          icon="pi pi-trash p-button-danger"
+          (click)="deleteItemDetail(item)"
+        ></button>
       </div>
     </div>
-    <div class="field row">
-      <button class="w-auto" type="submit" pButton (click)="createNew()">
-        Tạo mới
-      </button>
+    <div class="mt-2">
+      <button
+        type="submit"
+        pButton
+        (click)="addDetails()"
+        class="p-button-primary w-auto"
+        label="Thêm"
+      ></button>
       <button
         pButton
-        type="button"
+        (click)="saveDetails()"
         class="p-button-success w-auto"
-        (click)="onShowDetail()"
-        styleClass="h-auto"
-      >
-        Chi tiết phiếu nhập
-      </button>
+        label="Save"
+      ></button>
+      <button
+        pButton
+        class="p-button-danger w-auto"
+        label="Hủy"
+        (click)="deleteDetail()"
+      ></button>
     </div>
-  </ng-template>
+  </form>
 </p-dialog>
 
-<p-dialog
-  header="Chọn ảnh"
+<!-- <p-dialog
+  [(visible)]="showForm"
+  [style]="{ width: '30vw' }"
+  header="Import Coupon Details"
+  [modal]="true"
+  styleClass="p-fluid"
+>
+  <ng-template pTemplate="content">
+    <form action="" [formGroup]="importCouponForm">
+      <div class="field">
+        <label for="supplierId">Nhà cung cấp</label>
+        <select
+          id="supplierId"
+          pInputText
+          required
+          autofocus
+          formControlName="supplier_id"
+        >
+          <option value="">Chọn nhà cung cấp</option>
+          <option *ngFor="let supplier of listSupplier" [value]="supplier.id">
+            {{ supplier.name }}
+          </option>
+        </select>
+      </div>
+      <div class="row mt-1" *ngIf="listDetailCreate != null">
+        <div class="" *ngFor="let item of listDetailCreate">
+          Mã sản phẩm:{{ item.product_id }} - Số lượng:{{ item.quantity }} - Gía
+          tiền: {{ item.unit_price | number : "1.2-2" }}
+        </div>
+      </div>
+      <div class="field row">
+        <button class="w-auto" type="submit" pButton (click)="createNew()">
+          Tạo mới
+        </button>
+        <button
+          pButton
+          type="button"
+          class="p-button-success w-auto"
+          (click)="onShowDetail()"
+          styleClass="h-auto"
+        >
+          Chi tiết phiếu nhập
+        </button>
+      </div>
+    </form>
+  </ng-template>
+</p-dialog> -->
+
+<!-- <p-dialog
+  header="Chọn sản phẩm"
   [(visible)]="showDetail"
   [style]="{ width: '30vw' }"
   header="Import Coupon Details"
@@ -192,71 +378,118 @@
   styleClass="p-fluid"
   [transitionOptions]="'.3s'"
 >
-  <div>
-    <label for="supplierId">Sản phẩm</label>
-    <select
-      id="supplierId"
-      pInputText
-      required
-      autofocus
-      [(ngModel)]="importCouponDetailForm.product_id"
-      (ngModelChange)="
-        importCouponDetailForm.product_id = $event; onChangeProduct()
-      "
-    >
-      <option value="">Chọn sản phẩm</option>
-      <option *ngFor="let product of listProduct" [value]="product.id">
-        {{ product.name }}
-      </option>
-    </select>
-  </div>
-  <div>
-    <label for="supplierId">Số lượng</label>
-    <input
-      type="number"
-      [(ngModel)]="importCouponDetailForm.quantity"
-      class="w-full"
-      name="quantity"
-    />
-  </div>
-  <div>
-    <label for="supplierId">Đơn giá</label>
-    <input
-      type="number"
-      [(ngModel)]="importCouponDetailForm.unit_price"
-      class="w-full"
-      name="unit_price"
-    />
-  </div>
-  <div class="row mt-1" *ngIf="listDetailCreate != null">
-    <div class="" *ngFor="let item of listDetailCreate">
-      Mã sản phẩm:{{ item.product_id }} - Số lượng:{{ item.quantity }} - Gía
-      tiền: {{ item.unit_price | number : "1.2-2" }}
+  <form action="" [formGroup]="importCouponDetailForm">
+    <div>
+      <label for="supplierId">Sản phẩm</label>
+      <select
+        id="supplierId"
+        pInputText
+        required
+        autofocus
+        formControlName="product_id"
+        (ngModelChange)="
+          importCouponDetailForm.patchValue({ product_id: $event });
+          onChangeProduct()
+        "
+      >
+        <option value="">Chọn sản phẩm</option>
+        <option *ngFor="let product of listProduct" [value]="product.id">
+          {{ product.name }}
+        </option>
+      </select>
+    </div>
+    <div>
+      <label for="supplierId">Số lượng</label>
+      <input
+        class="form-control"
+        type="number"
+        formControlName="quantity"
+        class="w-full"
+        name="quantity"
+        [ngClass]="{
+          'is-invalid':
+            submitted && importCouponDetailForm.get('quantity')?.invalid
+        }"
+      />
+      <div
+        class="invalid-feedback"
+        *ngIf="
+          submitted &&
+          importCouponDetailForm.get('quantity')?.invalid &&
+          importCouponDetailForm.get('quantity')?.touched
+        "
+      >
+        <div
+          *ngIf="importCouponDetailForm.get('quantity')?.errors?.['required']"
+        >
+          Yêu lòng nhập số lượng của vật liệu
+        </div>
+        <div *ngIf="importCouponDetailForm.get('quantity')?.errors?.['min']">
+          Số lượng không dược nhỏ hơn 0
+        </div>
+      </div>
+    </div>
+    <div>
+      <label for="supplierId">Đơn giá</label>
+      <input
+        class="form-control"
+        type="number"
+        formControlName="unit_price"
+        class="w-full"
+        name="unit_price"
+        [ngClass]="{
+          'is-invalid':
+            submitted && importCouponDetailForm.get('unit_price')?.invalid
+        }"
+      />
+      <div
+        class="invalid-feedback"
+        *ngIf="
+          submitted &&
+          importCouponDetailForm.get('unit_price')?.invalid &&
+          importCouponDetailForm.get('unit_price')?.touched
+        "
+      >
+        <div
+          *ngIf="importCouponDetailForm.get('unit_price')?.errors?.['required']"
+        >
+          Yêu lòng nhập số lượng của vật liệu
+        </div>
+        <div *ngIf="importCouponDetailForm.get('unit_price')?.errors?.['min']">
+          Số lượng không dược nhỏ hơn 0
+        </div>
+      </div>
+    </div>
+    <div class="row mt-1" *ngIf="listDetailCreate != null">
+      <div class="" *ngFor="let item of listDetailCreate">
+        Mã sản phẩm:{{ item.product_id }} - Số lượng:{{ item.quantity }} - Gía
+        tiền: {{ item.unit_price | number : "1.2-2" }}
+        <button
+          icon="pi pi-trash p-button-danger"
+          (click)="deleteItemDetail(item)"
+        ></button>
+      </div>
+    </div>
+    <div class="mt-2">
       <button
-        icon="pi pi-trash p-button-danger"
-        (click)="deleteItemDetail(item)"
+        type="submit"
+        pButton
+        (click)="addDetails()"
+        class="p-button-primary w-auto"
+        label="Thêm"
+      ></button>
+      <button
+        pButton
+        (click)="saveDetails()"
+        class="p-button-success w-auto"
+        label="Save"
+      ></button>
+      <button
+        pButton
+        class="p-button-danger w-auto"
+        label="Hủy"
+        (click)="deleteDetail()"
       ></button>
     </div>
-  </div>
-  <div class="mt-2">
-    <button
-      type="submit"
-      pButton
-      (click)="addDetails()"
-      class="p-button-primary w-auto"
-      label="Thêm"
-    ></button>
-    <button
-      pButton
-      (click)="saveDetails()"
-      class="p-button-success w-auto"
-      label="Save"
-    ></button>
-    <button
-      pButton
-      class="p-button-danger w-auto"
-      label="Hủy"
-      (click)="deleteDetail()"
-    ></button>
-  </div>
-</p-dialog>
+  </form>
+</p-dialog> -->

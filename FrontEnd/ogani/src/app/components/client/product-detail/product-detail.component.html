@@ -61,7 +61,11 @@
               <div class="pro-qty">
                 <span class="dec qtybtn" (click)="subtractQuantity()">-</span>
                 <input type="text" [(ngModel)]="quantity" />
-                <span class="inc qtybtn" (click)="plusQuantity()">+</span>
+                <span
+                  class="inc qtybtn"
+                  (click)="quantity < product.quantity ? plusQuantity() : null"
+                  >+</span
+                >
               </div>
             </div>
           </div>
@@ -82,7 +86,11 @@
                   'out-of-stock': product.quantity === 0
                 }"
               >
-                {{ product.quantity > 0 ? "Còn hàng" : "Hết hàng" }}
+                {{
+                  product.quantity > 0
+                    ? "Còn hàng - Số lượng: " + product.quantity
+                    : "Hết hàng"
+                }}
               </span>
             </li>
             <li>

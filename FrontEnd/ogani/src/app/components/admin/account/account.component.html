@@ -165,51 +165,103 @@
   styleClass="p-fluid"
 >
   <ng-template pTemplate="content">
-    <div class="field">
-      <label for="username">Tên tài khoản</label>
-      <input
-        type="text"
-        pInputText
-        id="username"
-        [(ngModel)]="userForm.username"
-        required
-        autofocus
-      />
-    </div>
-    <div class="field">
-      <label for="email">Email</label>
-      <input
-        type="text"
-        pInputText
-        id="email"
-        [(ngModel)]="userForm.email"
-        required
-        autofocus
-      />
-    </div>
-    <div class="field">
-      <label for="password">Password</label>
-      <input
-        type="text"
-        pInputText
-        id="password"
-        [(ngModel)]="userForm.password"
-        required
-        autofocus
-      />
-    </div>
-  </ng-template>
-
-  <ng-template pTemplate="footer">
-    <button type="submit" pButton (click)="createAccount()">Tạo mới</button>
-    <button
-      pButton
-      type="button"
-      class="p-button-danger ml-3"
-      (click)="showForm = false"
-    >
-      Hủy
-    </button>
+    <form action="" [formGroup]="userForm">
+      <div class="field">
+        <label for="username">Tên tài khoản</label>
+        <input
+          class="form-control"
+          type="text"
+          pInputText
+          class="w-full"
+          formControlName="username"
+          name="username"
+          [ngClass]="{
+            'is-invalid': submitted && userForm.get('username')?.invalid
+          }"
+        />
+        <div
+          class="invalid-feedback"
+          *ngIf="submitted && userForm.get('username')?.invalid"
+        >
+          <div *ngIf="userForm.get('username')?.errors?.['required']">
+            Yêu lòng nhập tài khoản của bạn
+          </div>
+          <div *ngIf="userForm.get('username')?.errors?.['minlength']">
+            Độ dài tối thiểu phải là 5
+          </div>
+          <div *ngIf="userForm.get('username')?.errors?.['maxlength']">
+            Độ dài tối đa phải là 30
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input
+          class="form-control"
+          type="email"
+          pInputText
+          class="w-full"
+          formControlName="email"
+          name="email"
+          [ngClass]="{
+            'is-invalid': submitted && userForm.get('email')?.invalid
+          }"
+        />
+        <div
+          class="invalid-feedback"
+          *ngIf="submitted && userForm.get('email')?.invalid"
+        >
+          <div *ngIf="userForm.get('email')?.errors?.['required']">
+            Yêu lòng nhập Email
+          </div>
+          <div *ngIf="userForm.get('email')?.errors?.['minlength']">
+            Độ dài tối thiểu phải là 5
+          </div>
+          <div *ngIf="userForm.get('email')?.errors?.['maxlength']">
+            Độ dài tối đa phải là 30
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input
+          class="form-control"
+          type="password"
+          pPassword
+          class="w-full"
+          formControlName="password"
+          name="password"
+          [ngClass]="{
+            'is-invalid': submitted && userForm.get('password')?.invalid
+          }"
+        />
+        <div
+          class="invalid-feedback"
+          *ngIf="submitted && userForm.get('password')?.invalid"
+        >
+          <div *ngIf="userForm.get('password')?.errors?.['required']">
+            Yêu lòng nhập mật khẩu
+          </div>
+          <div *ngIf="userForm.get('password')?.errors?.['minlength']">
+            Độ dài tối thiểu phải là 5
+          </div>
+          <div *ngIf="userForm.get('password')?.errors?.['maxlength']">
+            Độ dài tối đa phải là 30
+          </div>
+        </div>
+      </div>
+      <div class="flex">
+        <button type="submit" pButton (click)="createAccount()">Tạo mới</button>
+        <button
+          pButton
+          type="button"
+          class="p-button-danger ml-3"
+          (click)="showForm = false"
+        >
+          Hủy
+        </button>
+      </div>
+    </form>
   </ng-template>
 </p-dialog>
 
@@ -224,7 +276,7 @@
     <i class="pi pi pi-exclamation-triangle"></i>
     <span class="ml-2"
       >Bạn có chắc xóa tài khoản người dùng
-      <span>{{ userForm.username }}</span> này ?</span
+      <span>{{ userForm.get("username")?.value }}</span> này ?</span
     >
   </div>
   <div class="flex justify-content-end mt-3">

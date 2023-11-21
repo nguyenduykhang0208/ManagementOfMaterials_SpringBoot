@@ -20,34 +20,46 @@
     [modal]="true"
     [transitionOptions]="'.3s'"
   >
-    <form action="">
+    <form
+      action=""
+      [formGroup]="categoryForm"
+      (ngSubmit)="onUpdate ? updateCategory() : createCategory()"
+    >
       <div class="p-field">
         <label for="username">Tên danh mục: </label>
         <input
+          class="form-control"
           type="text"
           pInputText
           class="w-full mt-2"
-          [(ngModel)]="categoryForm.name"
+          formControlName="name"
           name="name"
+          [ngClass]="{
+            'is-invalid': submitted && categoryForm.get('name')?.invalid
+          }"
         />
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            submitted &&
+            categoryForm.get('name')?.invalid &&
+            categoryForm.get('name')?.touched
+          "
+        >
+          <div *ngIf="categoryForm.get('name')?.errors?.['required']">
+            Yêu lòng nhập tên vật liệu
+          </div>
+          <div *ngIf="categoryForm.get('name')?.errors?.['minlength']">
+            Độ dài tối thiểu phải là 5
+          </div>
+          <div *ngIf="categoryForm.get('name')?.errors?.['maxlength']">
+            Độ dài tối đa phải là 30
+          </div>
+        </div>
       </div>
       <div class="p-field mt-3">
-        <button
-          type="submit"
-          pButton
-          (click)="createCategory()"
-          *ngIf="!onUpdate"
-        >
-          Tạo mới
-        </button>
-        <button
-          type="submit"
-          pButton
-          (click)="updateCategory()"
-          *ngIf="onUpdate"
-        >
-          Cập nhật
-        </button>
+        <button type="submit" pButton *ngIf="!onUpdate">Tạo mới</button>
+        <button type="submit" pButton *ngIf="onUpdate">Cập nhật</button>
         <button
           pButton
           type="button"
@@ -117,7 +129,8 @@
             <div>
               <i class="pi pi pi-exclamation-triangle"></i>
               <span class="ml-2"
-                >Bạn có chắc xóa <span>{{ categoryForm.name }}</span> ?</span
+                >Bạn có chắc xóa
+                <span>{{ categoryForm.get("name")?.value }}</span> ?</span
               >
             </div>
             <div class="flex justify-content-end mt-3">

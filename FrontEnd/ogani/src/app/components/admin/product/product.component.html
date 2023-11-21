@@ -135,182 +135,284 @@
   styleClass="p-fluid"
 >
   <ng-template pTemplate="content">
-    <!-- <img [src]="'assets/showcase/images/demo/product/' + product.image" [alt]="product.image" class="product-image" *ngIf="product.image"> -->
-    <div class="field">
-      <label for="name">Tên sản phẩm</label>
-      <input
-        type="text"
-        pInputText
-        id="name"
-        [(ngModel)]="productForm.name"
-        required
-        autofocus
-      />
-      <!-- <small class="p-error" *ngIf="submitted && !product.name">Name is required.</small> -->
-    </div>
-    <div class="field">
-      <label for="description">Mô tả</label>
-      <textarea
-        id="description"
-        pInputTextarea
-        [(ngModel)]="productForm.description"
-        required
-        rows="3"
-        cols="20"
-      ></textarea>
-    </div>
-
-    <div class="field">
-      <label class="mb-3">Loại vật liệu</label>
-      <div class="formgrid grid">
-        <div
-          class="field-radiobutton col-6"
-          *ngFor="let category of listCategory"
-        >
-          <p-radioButton
-            name="category"
-            value="{{ category.id }}"
-            [(ngModel)]="productForm.categoryId"
-            [inputId]="category.id"
-            class="mr-2"
-          ></p-radioButton>
-          <label [for]="category.id">{{ category.name }}</label>
-        </div>
-      </div>
-    </div>
-
-    <div class="formgrid grid">
-      <div class="field col">
-        <label for="price">Gía bán</label>
-        <p-inputNumber
-          id="price"
-          [(ngModel)]="productForm.price"
-          mode="currency"
-          currency="USD"
-          locale="en-US"
-        ></p-inputNumber>
-      </div>
-      <div class="field col">
-        <label for="quantity">Số lượng</label>
-        <p-inputNumber
-          id="quantity"
-          [(ngModel)]="productForm.quantity"
-        ></p-inputNumber>
-      </div>
-      <div class="field col">
-        <label for="unit">Đơn vị</label>
-        <!-- <p-inputNumber id="unit" [(ngModel)]="productForm.unit"></p-inputNumber> -->
-        <select
-          id="unit"
+    <form action="" [formGroup]="productForm">
+      <div class="field">
+        <label for="name">Tên sản phẩm</label>
+        <input
+          class="form-control"
+          type="text"
           pInputText
+          id="name"
+          formControlName="name"
           required
           autofocus
-          [(ngModel)]="productForm.unit"
+          [ngClass]="{
+            'is-invalid': submitted && productForm.get('name')?.invalid
+          }"
+        />
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            submitted &&
+            productForm.get('name')?.invalid &&
+            productForm.get('name')?.touched
+          "
         >
-          >
-          <option value="Miếng">Miếng</option>
-          <option value="Kg">Kg</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="field">
-      <button
-        pButton
-        type="button"
-        class="p-button-success w-auto"
-        (click)="onChooseImage()"
-      >
-        Chọn ảnh
-      </button>
-      <p-dialog
-        header="Chọn ảnh"
-        [(visible)]="showImage"
-        position="top"
-        [modal]="true"
-        [style]="{ width: '40vw' }"
-        [transitionOptions]="'.3s'"
-      >
-        <div class="flex justify-content-between">
-          <div>
-            <input type="file" #file (change)="uploadFile($event)" hidden />
-            <button
-              pButton
-              (click)="file.click()"
-              label="Tải ảnh lên"
-              icon="pi pi-plus"
-              class="p-button-warning w-auto"
-            ></button>
+          <div *ngIf="productForm.get('name')?.errors?.['required']">
+            Yêu lòng nhập tên vật liệu
           </div>
-          <div>
-            <button
-              pButton
-              (click)="chooseImage()"
-              class="p-button-primary w-auto"
-              label="Chọn ảnh"
-              [disabled]="disabled"
-            ></button>
-            <button
-              pButton
-              class="p-button-danger ml-2 w-auto"
-              icon="pi pi-trash "
-              label="Xóa ảnh"
-              [disabled]="disabled"
-            ></button>
+          <div *ngIf="productForm.get('name')?.errors?.['minlength']">
+            Độ dài tối thiểu phải là 5
+          </div>
+          <div *ngIf="productForm.get('name')?.errors?.['maxlength']">
+            Độ dài tối đa phải là 50
           </div>
         </div>
-        <p-divider align="left"> Ảnh đã tải lên </p-divider>
-        <div class="grid">
+      </div>
+      <div class="field">
+        <label for="description">Mô tả</label>
+        <textarea
+          class="form-control"
+          id="description"
+          pInputTextarea
+          formControlName="description"
+          required
+          rows="3"
+          cols="20"
+          [ngClass]="{
+            'is-invalid': submitted && productForm.get('description')?.invalid
+          }"
+        ></textarea>
+        <div
+          class="invalid-feedback"
+          *ngIf="
+            submitted &&
+            productForm.get('description')?.invalid &&
+            productForm.get('description')?.touched
+          "
+        >
+          <div *ngIf="productForm.get('description')?.errors?.['required']">
+            Yêu lòng nhập mô tả của vật liệu
+          </div>
+          <div *ngIf="productForm.get('description')?.errors?.['minlength']">
+            Độ dài tối thiểu phải là 5
+          </div>
+          <div *ngIf="productForm.get('description')?.errors?.['maxlength']">
+            Độ dài tối đa phải là 1000
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="mb-3">Loại vật liệu</label>
+        <div class="formgrid grid">
           <div
-            class="col-4 list-image flex align-items-center"
-            *ngFor="let image of listImage"
+            class="field-radiobutton col-6"
+            *ngFor="let category of listCategory"
+          >
+            <p-radioButton
+              formControlName="categoryId"
+              [value]="category.id"
+              [inputId]="category.id"
+              class="mr-2"
+            ></p-radioButton>
+            <label [for]="category.id">{{ category.name }}</label>
+          </div>
+        </div>
+      </div>
+      <div class="formgrid grid">
+        <div class="field col">
+          <label for="price">Gía bán</label>
+          <input
+            type="number"
+            class="form-control"
+            id="price"
+            formControlName="price"
+            mode="currency"
+            [ngClass]="{
+              'is-invalid': submitted && productForm.get('price')?.invalid
+            }"
+          />
+          <div
+            class="invalid-feedback"
+            *ngIf="
+              submitted &&
+              productForm.get('price')?.invalid &&
+              productForm.get('price')?.touched
+            "
+          >
+            <div *ngIf="productForm.get('price')?.errors?.['required']">
+              Yêu lòng nhập giá bán của vật liệu
+            </div>
+            <div *ngIf="productForm.get('price')?.errors?.['min']">
+              Gía bán không dược nhỏ hơn 0
+            </div>
+          </div>
+        </div>
+        <div class="field col">
+          <label for="quantity">Số lượng</label>
+          <input
+            type="number"
+            class="form-control"
+            id="quantity"
+            formControlName="quantity"
+            [ngClass]="{
+              'is-invalid': submitted && productForm.get('quantity')?.invalid
+            }"
+          />
+          <div
+            class="invalid-feedback"
+            *ngIf="
+              submitted &&
+              productForm.get('quantity')?.invalid &&
+              productForm.get('quantity')?.touched
+            "
+          >
+            <div *ngIf="productForm.get('quantity')?.errors?.['required']">
+              Yêu lòng nhập số lượng vật liệu
+            </div>
+            <div *ngIf="productForm.get('quantity')?.errors?.['min']">
+              Số lượng không dược nhỏ hơn 0
+            </div>
+          </div>
+        </div>
+        <div class="field col">
+          <label for="unit">Đơn vị</label>
+          <select
+            class="form-control"
+            id="unit"
+            pInputText
+            required
+            autofocus
+            formControlName="unit"
+            [ngClass]="{
+              'is-invalid': submitted && productForm.get('unit')?.invalid
+            }"
+          >
+            >
+            <option value="Miếng">Miếng</option>
+            <option value="Kg">Kg</option>
+          </select>
+          <div
+            class="invalid-feedback"
+            *ngIf="
+              submitted &&
+              productForm.get('unit')?.invalid &&
+              productForm.get('unit')?.touched
+            "
+          >
+            <div *ngIf="productForm.get('unit')?.errors?.['required']">
+              Yêu lòng nhập đơn vị của vật liệu
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <button
+          pButton
+          type="button"
+          class="p-button-success w-auto"
+          (click)="onChooseImage()"
+        >
+          Chọn ảnh
+        </button>
+        <p-dialog
+          header="Chọn ảnh"
+          [(visible)]="showImage"
+          position="top"
+          [modal]="true"
+          [style]="{ width: '40vw' }"
+          [transitionOptions]="'.3s'"
+        >
+          <div class="flex justify-content-between">
+            <div>
+              <input type="file" #file (change)="uploadFile($event)" hidden />
+              <button
+                pButton
+                (click)="file.click()"
+                label="Tải ảnh lên"
+                icon="pi pi-plus"
+                class="p-button-warning w-auto"
+              ></button>
+            </div>
+            <div>
+              <button
+                pButton
+                (click)="chooseImage()"
+                class="p-button-primary w-auto"
+                label="Chọn ảnh"
+                [disabled]="disabled"
+              ></button>
+              <button
+                pButton
+                class="p-button-danger ml-2 w-auto"
+                icon="pi pi-trash "
+                label="Xóa ảnh"
+                [disabled]="disabled"
+              ></button>
+            </div>
+          </div>
+          <p-divider align="left"> Ảnh đã tải lên </p-divider>
+          <div class="grid">
+            <div
+              class="col-4 list-image flex align-items-center"
+              *ngFor="let image of listImage"
+            >
+              <img
+                src="{{ 'data:image/jpg;base64,' + image.data }}"
+                alt=""
+                class="w-full h-full p-2 border-1"
+                (click)="selectImage($event, image)"
+              />
+            </div>
+          </div>
+        </p-dialog>
+        <div class="grid mt-1" *ngIf="listImageChoosen != null">
+          <div
+            class="product-image col-2 flex align-items-center"
+            *ngFor="let image of listImageChoosen"
           >
             <img
               src="{{ 'data:image/jpg;base64,' + image.data }}"
               alt=""
-              class="w-full h-full p-2 border-1"
-              (click)="selectImage($event, image)"
+              class="w-full h-full"
             />
+            <button
+              pButton
+              pRipple
+              type="button"
+              icon="pi pi-times"
+              class="p-button-rounded p-button-danger p-button-text delete-image"
+            ></button>
           </div>
         </div>
-      </p-dialog>
-      <div class="grid mt-1" *ngIf="listImageChoosen != null">
-        <div
-          class="product-image col-2 flex align-items-center"
-          *ngFor="let image of listImageChoosen"
-        >
-          <img
-            src="{{ 'data:image/jpg;base64,' + image.data }}"
-            alt=""
-            class="w-full h-full"
-          />
-          <button
-            pButton
-            pRipple
-            type="button"
-            icon="pi pi-times"
-            class="p-button-rounded p-button-danger p-button-text delete-image"
-          ></button>
-        </div>
       </div>
-    </div>
-  </ng-template>
-
-  <ng-template pTemplate="footer">
-    <button type="submit" pButton *ngIf="!onUpdate" (click)="createProduct()">
-      Tạo mới
-    </button>
-    <button type="submit" pButton *ngIf="onUpdate" (click)="updateProduct()">
-      Cập nhật
-    </button>
-    <button
-      pButton
-      type="button"
-      class="p-button-danger ml-3"
-      (click)="showForm = false"
-    >
-      Hủy
-    </button>
+      <div class="flex">
+        <button
+          type="submit"
+          pButton
+          *ngIf="!onUpdate"
+          (click)="createProduct()"
+        >
+          Tạo mới
+        </button>
+        <button
+          type="submit"
+          pButton
+          *ngIf="onUpdate"
+          (click)="updateProduct()"
+        >
+          Cập nhật
+        </button>
+        <button
+          pButton
+          type="button"
+          class="p-button-danger ml-3"
+          (click)="showForm = false"
+        >
+          Hủy
+        </button>
+      </div>
+    </form>
   </ng-template>
 </p-dialog>
 
@@ -324,7 +426,8 @@
   <div>
     <i class="pi pi pi-exclamation-triangle"></i>
     <span class="ml-2"
-      >Bạn có chắc xóa vật liệu <span>{{ productForm.name }}</span> ?</span
+      >Bạn có chắc xóa vật liệu
+      <span>{{ productForm.get("name")?.value }}</span> ?</span
     >
   </div>
   <div class="flex justify-content-end mt-3">

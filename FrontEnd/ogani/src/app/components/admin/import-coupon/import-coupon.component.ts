@@ -8,6 +8,7 @@ import { SupplierService } from 'src/app/_service/supplier.service';
 import { ProductService } from 'src/app/_service/product.service';
 import { ImportCouponDetail } from 'src/app/_class/importcoupon_detail';
 import { concatMap, from } from 'rxjs';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-import-coupon',
@@ -28,14 +29,27 @@ export class ImportCouponComponent implements OnInit {
   showDetail: boolean = false;
   listDetailCreate: any = [];
   listImportCouponDetail: any[] = [];
-  importCouponDetailForm: any = {
-    product_id: null,
-    quantity: null,
-    unit_price: null,
-  };
-  importCouponForm: any = {
-    supplier_id: null,
-  };
+  submitted = false;
+  importCouponId: any;
+  // importCouponDetailForm: any = {
+  //   product_id: null,
+  //   quantity: null,
+  //   unit_price: null,
+  // };
+  // importCouponForm: any = {
+  //   supplier_id: null,
+  // };
+
+  importCouponDetailForm = new FormGroup({
+    product_id: new FormControl(0, [Validators.required]),
+    quantity: new FormControl(0, [Validators.required, Validators.min(0)]),
+    unit_price: new FormControl(0, [Validators.required, Validators.min(0)]),
+  });
+  importCouponForm = new FormGroup({
+    id: new FormControl(0),
+    supplier_id: new FormControl(0, [Validators.required]),
+  });
+
   constructor(
     private router: Router,
     private storageService: StorageService,
@@ -94,18 +108,6 @@ export class ImportCouponComponent implements OnInit {
     this.importCouponService.getListImportCouponDetail(id).subscribe({
       next: (res) => {
         this.listDetail = res;
-        // this.listDetail.map((i: any) => {
-        //   this.productService
-        //     .updateQuantityProduct(i.product.id, i.quantity)
-        //     .subscribe({
-        //       next: (res) => {
-        //         this.showSuccess('Cập nhật thành công!!');
-        //       },
-        //       error: (err) => {
-        //         this.showError(err.message);
-        //       },
-        //     });
-        // });
         from(this.listDetail)
           .pipe(
             concatMap((item: any) => {
@@ -143,79 +145,99 @@ export class ImportCouponComponent implements OnInit {
   }
   openNew() {
     this.showForm = true;
-    this.importCouponDetailForm = {
+    this.submitted = false;
+    this.importCouponDetailForm.setValue({
       product_id: null,
       quantity: null,
       unit_price: null,
-    };
-    this.importCouponForm = {
-      user_id: null,
+    });
+    this.importCouponForm.patchValue({
       supplier_id: null,
-    };
+    });
     this.listDetailCreate = [];
   }
   onShowDetail() {
     this.showDetail = true;
+    this.submitted = false;
     if (this.listDetailCreate == null) {
-      this.importCouponDetailForm = {
+      this.importCouponDetailForm.setValue({
         product_id: null,
         quantity: null,
         unit_price: null,
-      };
+      });
     }
   }
   createNew() {
-    const { supplier_id } = this.importCouponForm;
+    this.submitted = true;
+    // const { supplier_id } = this.importCouponForm;
+    const supplier_id = this.importCouponForm.get('supplier_id')?.value || 0;
     for (const formData of this.listDetailCreate) {
       let importCouponDetail: ImportCouponDetail = new ImportCouponDetail();
-      importCouponDetail.productId = Number(formData.product_id); // Chuyển đổi thành kiểu number
-      importCouponDetail.quantity = Number(formData.quantity); // Chuyển đổi thành kiểu number
-      importCouponDetail.unitPrice = Number(formData.unit_price); // Chuyển đổi thành kiểu number
+      importCouponDetail.productId = Number(formData.product_id);
+      importCouponDetail.quantity = Number(formData.quantity);
+      importCouponDetail.unitPrice = Number(formData.unit_price);
 
       this.listImportCouponDetail.push(importCouponDetail);
     }
     // this.deleteDetail();
-    this.importCouponService
-      .createImportCoupon(
-        this.userId,
-        +supplier_id,
-        this.listImportCouponDetail
-      )
-      .subscribe({
-        next: (res) => {
-          this.getData();
-          this.showSuccess('Tạo phiếu nhập hàng thành công mới thành công!');
-          this.showForm = false;
-        },
-        error: (err) => {
-          this.showError(err.message);
-        },
-      });
+    if (this.importCouponForm.valid) {
+      this.importCouponService
+        .createImportCoupon(
+          this.userId,
+          +supplier_id,
+          this.listImportCouponDetail
+        )
+        .subscribe({
+          next: (res) => {
+            this.getData();
+            this.showSuccess('Tạo phiếu nhập hàng thành công mới thành công!');
+            this.showForm = false;
+            this.submitted = false;
+          },
+          error: (err) => {
+            this.showError(err.message);
+            this.submitted = false;
+          },
+        });
+    }
   }
   addDetails() {
-    this.onChangeProduct();
-    this.listDetailCreate.push(this.importCouponDetailForm);
-    this.importCouponDetailForm = {
-      product_id: null,
-      quantity: null,
-      unit_price: null,
-    };
+    this.submitted = true;
+    if (this.importCouponDetailForm.valid) {
+      // this.onChangeProduct();
+      // this.listDetailCreate.push(this.importCouponDetailForm);
+      const newDetail = { ...this.importCouponDetailForm.value };
+      this.onChangeProduct();
+      this.listDetailCreate.push(newDetail);
+      this.importCouponDetailForm.setValue({
+        product_id: null,
+        quantity: null,
+        unit_price: null,
+      });
+      this.submitted = false;
+    }
   }
   saveDetails() {
     this.showDetail = false;
+    this.submitted = false;
   }
-  onDelete(id: string) {
+  onDelete(id: number) {
     this.deleteForm = true;
-    this.importCouponForm.id = id;
+    this.importCouponId = id;
+    // this.importCouponForm.id = id;
+    // this.importCouponForm.patchValue({
+    //   id: id,
+    // });
   }
   deleteDetail() {
-    this.importCouponDetailForm = {
+    this.importCouponDetailForm.setValue({
       product_id: null,
       quantity: null,
       unit_price: null,
-    };
+    });
     this.listDetailCreate = [];
     this.showDetail = false;
+    this.submitted = false;
   }
   deleteItemDetail(item: any) {
     const targetElement = item;
@@ -230,8 +252,8 @@ export class ImportCouponComponent implements OnInit {
       this.listDetailCreate.splice(index, 1);
     }
   }
-  deleteImportCoupon(id: number) {
-    this.importCouponService.deleteImportCoupon(id).subscribe({
+  deleteImportCoupon() {
+    this.importCouponService.deleteImportCoupon(this.importCouponId).subscribe({
       next: (res) => {
         this.getData();
         this.showWarn('Xóa phiếu nhập hàng thành công!!');
@@ -244,8 +266,11 @@ export class ImportCouponComponent implements OnInit {
   }
 
   onChangeProduct() {
-    this.importCouponDetailForm.product_id =
-      +this.importCouponDetailForm.product_id;
+    // this.importCouponDetailForm.product_id =
+    //   +this.importCouponDetailForm.product_id;
+    this.importCouponDetailForm.patchValue({
+      product_id: this.importCouponDetailForm.get('product_id')?.value || 0,
+    });
   }
 
   showSuccess(text: string) {

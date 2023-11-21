@@ -57,7 +57,11 @@
           />
           <div
             class="invalid-feedback"
-            *ngIf="submitted && registerForm.get('username')?.invalid"
+            *ngIf="
+              submitted &&
+              registerForm.get('username')?.invalid &&
+              registerForm.get('username')?.touched
+            "
           >
             <div *ngIf="registerForm.get('username')?.errors?.['required']">
               Yêu lòng nhập tài khoản của bạn
@@ -86,7 +90,11 @@
           />
           <div
             class="invalid-feedback"
-            *ngIf="submitted && registerForm.get('email')?.invalid"
+            *ngIf="
+              submitted &&
+              registerForm.get('email')?.invalid &&
+              registerForm.get('email')?.touched
+            "
           >
             <div *ngIf="registerForm.get('email')?.errors?.['required']">
               Yêu lòng nhập Email
@@ -114,7 +122,11 @@
           />
           <div
             class="invalid-feedback"
-            *ngIf="submitted && registerForm.get('password')?.invalid"
+            *ngIf="
+              submitted &&
+              registerForm.get('password')?.invalid &&
+              registerForm.get('password')?.touched
+            "
           >
             <div *ngIf="registerForm.get('password')?.errors?.['required']">
               Yêu lòng nhập mật khẩu

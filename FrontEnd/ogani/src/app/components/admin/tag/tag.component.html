@@ -21,22 +21,36 @@
     [modal]="true"
     [transitionOptions]="'.2s'"
   >
-    <form action="">
+    <form action="" [formGroup]="tagForm">
       <div class="p-field">
         <label for="username">Tên Tag: </label>
         <input
+          class="form-control"
           type="text"
           pInputText
           class="w-full mt-2"
-          [(ngModel)]="tagForm.name"
+          formControlName="name"
           name="name"
+          [ngClass]="{
+            'is-invalid': submitted && tagForm.get('name')?.invalid
+          }"
         />
+        <div
+          class="invalid-feedback"
+          *ngIf="submitted && tagForm.get('name')?.invalid"
+        >
+          <div *ngIf="tagForm.get('name')?.errors?.['required']">
+            Yêu lòng nhập tên tag
+          </div>
+        </div>
       </div>
       <div class="p-field mt-3">
         <button type="submit" pButton (click)="createTag()" *ngIf="!onUpdate">
           Tạo mới
         </button>
-        <button type="submit" pButton *ngIf="onUpdate">Cập nhật</button>
+        <button type="submit" pButton *ngIf="onUpdate" (click)="updateTag()">
+          Cập nhật
+        </button>
         <button
           pButton
           type="button"
@@ -86,6 +100,7 @@
             type="button"
             icon="pi pi-pencil"
             class="p-button-rounded p-button-primary"
+            (click)="onUpdateForm(tag.id, tag.name)"
           ></button>
           <button
             pButton

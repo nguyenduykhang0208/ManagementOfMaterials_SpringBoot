@@ -167,18 +167,22 @@ export class IndexComponent implements OnInit {
     const username = this.registerForm.get('username')?.value || '';
     const email = this.registerForm.get('email')?.value || '';
     const password = this.registerForm.get('password')?.value || '';
-    this.authService.register(username, email, password).subscribe({
-      next: (res) => {
-        this.isSuccessful = true;
-        this.isSignUpFailed = false;
-        this.showSuccess('Đăng ký thành công');
-        this.authModal = false;
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        this.isSignUpFailed = true;
-      },
-    });
+    if (this.registerForm.valid) {
+      this.authService.register(username, email, password).subscribe({
+        next: (res) => {
+          this.isSuccessful = true;
+          this.isSignUpFailed = false;
+          this.loginForm.username = username;
+          this.loginForm.password = password;
+          this.login();
+          this.authModal = false;
+        },
+        error: (err) => {
+          this.errorMessage = err.error.message;
+          this.isSignUpFailed = true;
+        },
+      });
+    }
   }
 
   logout(): void {

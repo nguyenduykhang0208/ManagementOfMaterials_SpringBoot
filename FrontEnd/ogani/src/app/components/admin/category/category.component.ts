@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { CategoryService } from 'src/app/_service/category.service';
 import { StorageService } from 'src/app/_service/storage.service';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-category',
@@ -20,10 +21,16 @@ export class CategoryComponent implements OnInit {
 
   userRole: any;
 
-  categoryForm: any = {
-    id: null,
-    name: null,
-  };
+  submitted = false;
+
+  categoryForm = new FormGroup({
+    id: new FormControl(0),
+    name: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(30),
+    ]),
+  });
 
   constructor(
     private messageService: MessageService,
@@ -44,7 +51,6 @@ export class CategoryComponent implements OnInit {
     this.categoryService.getListCategory().subscribe({
       next: (res) => {
         this.listCategory = res;
-        // console.log(res);
       },
       error: (err) => {
         console.log(err);
@@ -53,53 +59,70 @@ export class CategoryComponent implements OnInit {
   }
 
   showForm() {
+    this.submitted = false;
     this.onUpdate = false;
-    this.categoryForm = {
-      id: null,
+    this.categoryForm.setValue({
+      id: 0,
       name: null,
-    };
+    });
     this.displayForm = true;
   }
 
   onUpdateForm(id: number, name: string) {
+    this.submitted = false;
     this.onUpdate = true;
     this.displayForm = true;
-    this.categoryForm.id = id;
-    this.categoryForm.name = name;
+    this.categoryForm.setValue({
+      id: id,
+      name: name,
+    });
   }
 
   onDelete(id: number, name: string) {
     this.deleteForm = true;
-    this.categoryForm.id = id;
-    this.categoryForm.name = name;
+    this.categoryForm.setValue({
+      id: id,
+      name: name,
+    });
   }
 
   createCategory() {
-    const { name } = this.categoryForm;
-    this.categoryService.createCategory(name).subscribe({
-      next: (res) => {
-        this.getListCategory();
-        this.showSuccess('Tạo danh mục thành công!');
-        this.displayForm = false;
-      },
-      error: (err) => {
-        this.showError(err.message);
-      },
-    });
+    this.submitted = true;
+    const name = this.categoryForm.get('name')?.value || '';
+    if (this.categoryForm.valid) {
+      this.categoryService.createCategory(name).subscribe({
+        next: (res) => {
+          this.getListCategory();
+          this.showSuccess('Tạo danh mục thành công!');
+          this.displayForm = false;
+          this.submitted = false;
+        },
+        error: (err) => {
+          this.showError(err.message);
+          this.submitted = false;
+        },
+      });
+    }
   }
 
   updateCategory() {
-    const { id, name } = this.categoryForm;
-    this.categoryService.updateCategory(id, name).subscribe({
-      next: (res) => {
-        this.getListCategory();
-        this.showSuccess('Cập nhật danh mục thành công!');
-        this.displayForm = false;
-      },
-      error: (err) => {
-        this.showError(err.message);
-      },
-    });
+    this.submitted = true;
+    const id = this.categoryForm.get('id')?.value || 0;
+    const name = this.categoryForm.get('name')?.value || '';
+    if (this.categoryForm.valid) {
+      this.categoryService.updateCategory(id, name).subscribe({
+        next: (res) => {
+          this.getListCategory();
+          this.showSuccess('Cập nhật danh mục thành công!');
+          this.displayForm = false;
+          this.submitted = false;
+        },
+        error: (err) => {
+          this.showError(err.message);
+          this.submitted = false;
+        },
+      });
+    }
   }
 
   enableCategory(id: number) {
@@ -115,17 +138,22 @@ export class CategoryComponent implements OnInit {
   }
 
   deleteCategory() {
-    const { id } = this.categoryForm;
-    this.categoryService.deleteCategory(id).subscribe({
-      next: (res) => {
-        this.getListCategory();
-        this.showWarn('Xóa danh mục thành công!!');
-        this.deleteForm = false;
-      },
-      error: (err) => {
-        this.showError(err.message);
-      },
-    });
+    this.submitted = true;
+    const id = this.categoryForm.get('id')?.value || 0;
+    if (this.categoryForm.valid) {
+      this.categoryService.deleteCategory(id).subscribe({
+        next: (res) => {
+          this.getListCategory();
+          this.showWarn('Xóa danh mục thành công!!');
+          this.deleteForm = false;
+          this.submitted = false;
+        },
+        error: (err) => {
+          this.showError(err.message);
+          this.submitted = false;
+        },
+      });
+    }
   }
 
   showSuccess(text: string) {

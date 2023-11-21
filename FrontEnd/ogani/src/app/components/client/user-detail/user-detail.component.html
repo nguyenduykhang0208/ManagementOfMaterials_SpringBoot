@@ -149,40 +149,131 @@
               [modal]="true"
               [transitionOptions]="'.3s'"
             >
-              <form action="">
+              <form
+                action=""
+                [formGroup]="changePasswordForm"
+                (ngSubmit)="changePasswordFunc()"
+              >
                 <div class="p-field">
-                  <label for="username">Mật khẩu cũ: </label>
+                  <label for="oldPassword">Mật khẩu cũ: </label>
                   <input
+                    class="form-control"
                     type="text"
                     pInputText
                     class="w-full mt-2"
-                    [(ngModel)]="changePasswordForm.oldPassword"
+                    formControlName="oldPassword"
                     name="oldPassword"
+                    [ngClass]="{
+                      'is-invalid':
+                        submitted &&
+                        changePasswordForm.get('oldPassword')?.invalid
+                    }"
                   />
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="
+                      submitted &&
+                      changePasswordForm.get('oldPassword')?.invalid &&
+                      changePasswordForm.get('oldPassword')?.touched
+                    "
+                  >
+                    <div
+                      *ngIf="changePasswordForm.get('oldPassword')?.errors?.['required']"
+                    >
+                      Yêu lòng nhập mật khẩu cũ của bạn
+                    </div>
+                  </div>
                 </div>
                 <div class="p-field">
-                  <label for="username">Mật khẩu mới: </label>
+                  <label for="newPassword">Mật khẩu mới: </label>
                   <input
+                    class="form-control"
                     type="text"
                     pInputText
                     class="w-full mt-2"
-                    name="name"
-                    [(ngModel)]="changePasswordForm.newPassword"
+                    name="newPassword"
+                    formControlName="newPassword"
+                    [ngClass]="{
+                      'is-invalid':
+                        submitted &&
+                        changePasswordForm.get('newPassword')?.invalid &&
+                        changePasswordForm.get('newPassword')?.touched
+                    }"
                   />
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="
+                      submitted &&
+                      changePasswordForm.get('newPassword')?.invalid
+                    "
+                  >
+                    <div
+                      *ngIf="changePasswordForm.get('newPassword')?.errors?.['required']"
+                    >
+                      Yêu lòng nhập mật khẩu mới của bạn
+                    </div>
+                    <div
+                      *ngIf="changePasswordForm.get('newPassword')?.errors?.['minlength']"
+                    >
+                      Độ dài tối thiểu phải là 5
+                    </div>
+                    <div
+                      *ngIf="changePasswordForm.get('newPassword')?.errors?.['maxlength']"
+                    >
+                      Độ dài tối đa phải là 30
+                    </div>
+                  </div>
                 </div>
                 <div class="p-field">
-                  <label for="username">Nhập lại mật khẩu: </label>
+                  <label for="newPasswordConfim">Nhập lại mật khẩu: </label>
                   <input
+                    class="form-control"
                     type="text"
                     pInputText
                     class="w-full mt-2"
-                    name="name"
+                    formControlName="newPasswordConfim"
+                    name="newPasswordConfim"
+                    [ngClass]="{
+                      'is-invalid':
+                        submitted &&
+                        changePasswordForm.get('newPasswordConfim')?.invalid &&
+                        changePasswordForm.get('newPasswordConfim')?.touched
+                    }"
                   />
+                  <div
+                    class="invalid-feedback"
+                    *ngIf="
+                      submitted &&
+                      changePasswordForm.get('newPasswordConfim')?.invalid
+                    "
+                  >
+                    <div
+                      *ngIf="changePasswordForm.get('newPasswordConfim')?.errors?.['required']"
+                    >
+                      Yêu lòng nhập mật khẩu mới của bạn
+                    </div>
+                    <div
+                      *ngIf="changePasswordForm.get('newPasswordConfim')?.errors?.['minlength']"
+                    >
+                      Độ dài tối thiểu phải là 5
+                    </div>
+                    <div
+                      *ngIf="
+                        changePasswordForm.get('newPasswordConfim') !==
+                        changePasswordForm.get('newPassword')
+                      "
+                    >
+                      Vui lòng nhập lại đúng mật khẩu mới
+                    </div>
+                    <div
+                      *ngIf="changePasswordForm.get('newPasswordConfim')?.errors?.['maxlength']"
+                    >
+                      Độ dài tối đa phải là 30
+                    </div>
+                  </div>
                 </div>
                 <div class="p-field mt-3">
-                  <button type="submit" pButton (click)="changePasswordFunc()">
-                    Save
-                  </button>
+                  <button type="submit" pButton>Save</button>
                   <button
                     pButton
                     type="button"

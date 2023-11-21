@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { StorageService } from 'src/app/_service/storage.service';
 import { SupplierService } from 'src/app/_service/supplier.service';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-supplier',
@@ -19,13 +20,23 @@ export class SupplierComponent implements OnInit {
   onUpdate: boolean = false;
   showDelete: boolean = false;
   userRole: any;
+  submitted = false;
 
-  supplierForm: any = {
-    name: null,
-    phone: null,
-    address: null,
-    email: null,
-  };
+  supplierForm = new FormGroup({
+    id: new FormControl(0),
+    name: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(50),
+    ]),
+    phone: new FormControl(''),
+    address: new FormControl(''),
+    email: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(30),
+    ]),
+  });
   constructor(
     private messageService: MessageService,
     private supplierService: SupplierService,
@@ -41,17 +52,18 @@ export class SupplierComponent implements OnInit {
   onUpdateForm(data: any) {
     this.onUpdate = true;
     this.displayForm = true;
-    this.supplierForm.id = data.id;
-    this.supplierForm.name = data.name;
-    this.supplierForm.phone = data.phone;
-    this.supplierForm.address = data.address;
-    this.supplierForm.email = data.email;
+    this.supplierForm.setValue({
+      id: data.id,
+      name: data.name,
+      phone: data.phone,
+      address: data.address,
+      email: data.email,
+    });
   }
   getListSupplier() {
     this.supplierService.getListSupplier().subscribe({
       next: (res) => {
         this.listSupplier = res;
-        console.log(this.listSupplier);
       },
       error: (err) => {
         console.log(err);
@@ -60,48 +72,73 @@ export class SupplierComponent implements OnInit {
   }
   showForm() {
     this.onUpdate = false;
-    this.supplierForm = {
-      id: null,
+    this.submitted = false;
+    this.supplierForm.patchValue({
+      id: 0,
       name: null,
-    };
+    });
     this.displayForm = true;
   }
   createSupplier() {
-    const { name, phone, address, email } = this.supplierForm;
-    this.supplierService.createSupplier(name, phone, address, email).subscribe({
-      next: (res) => {
-        this.getListSupplier();
-        this.showSuccess('Tạo nhà cung cấp mới thành công!');
-        this.displayForm = false;
-      },
-      error: (err) => {
-        this.showError(err.message);
-      },
-    });
+    this.submitted = true;
+    const name = this.supplierForm.get('name')?.value || '';
+    const phone = this.supplierForm.get('phone')?.value || '';
+    const address = this.supplierForm.get('address')?.value || '';
+    const email = this.supplierForm.get('email')?.value || '';
+    if (this.supplierForm.valid) {
+      this.supplierService
+        .createSupplier(name, phone, address, email)
+        .subscribe({
+          next: (res) => {
+            this.getListSupplier();
+            this.showSuccess('Tạo nhà cung cấp mới thành công!');
+            this.displayForm = false;
+            this.submitted = false;
+          },
+          error: (err) => {
+            this.showError(err.message);
+            this.submitted = false;
+          },
+        });
+    }
   }
   updateSupplier() {
-    const { id, name, phone, address, email } = this.supplierForm;
-    this.supplierService
-      .updateSupplier(id, name, phone, address, email)
-      .subscribe({
-        next: (res) => {
-          this.getListSupplier();
-          this.showSuccess('Cập nhật nhà cung cấp thành công!');
-          this.displayForm = false;
-        },
-        error: (err) => {
-          this.showError(err.message);
-        },
-      });
+    this.submitted = true;
+    const id = this.supplierForm.get('id')?.value || 0;
+    const name = this.supplierForm.get('name')?.value || '';
+    const phone = this.supplierForm.get('phone')?.value || '';
+    const address = this.supplierForm.get('address')?.value || '';
+    const email = this.supplierForm.get('email')?.value || '';
+    if (this.supplierForm.valid) {
+      this.supplierService
+        .updateSupplier(id, name, phone, address, email)
+        .subscribe({
+          next: (res) => {
+            this.getListSupplier();
+            this.showSuccess('Cập nhật nhà cung cấp thành công!');
+            this.displayForm = false;
+            this.submitted = false;
+          },
+          error: (err) => {
+            this.showError(err.message);
+            this.submitted = false;
+          },
+        });
+    }
   }
   onDelete(id: number, name: string) {
-    this.supplierForm.id = null;
+    this.supplierForm.patchValue({
+      id: 0,
+    });
     this.showDelete = true;
-    this.supplierForm.id = id;
-    this.supplierForm.name = name;
+    this.supplierForm.patchValue({
+      id: id,
+      name: name,
+    });
   }
   deleteSupplier() {
-    this.supplierService.deleteSupplier(this.supplierForm.id).subscribe({
+    const id = this.supplierForm.get('id')?.value || 0;
+    this.supplierService.deleteSupplier(id).subscribe({
       next: (res) => {
         this.getListSupplier();
         this.showWarn('Xóa thành công');

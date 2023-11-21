@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { StorageService } from 'src/app/_service/storage.service';
 import { TagService } from 'src/app/_service/tag.service';
-
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 @Component({
   selector: 'app-tag',
   templateUrl: './tag.component.html',
@@ -20,10 +20,12 @@ export class TagComponent implements OnInit {
 
   userRole: any;
 
-  tagForm: any = {
-    id: null,
-    name: null,
-  };
+  submitted = false;
+
+  tagForm = new FormGroup({
+    id: new FormControl(0),
+    name: new FormControl('', [Validators.required]),
+  });
 
   constructor(
     private tagService: TagService,
@@ -53,51 +55,67 @@ export class TagComponent implements OnInit {
 
   showForm() {
     this.onUpdate = false;
-    this.tagForm = {
-      id: null,
+    this.submitted = false;
+    this.tagForm.setValue({
+      id: 0,
       name: null,
-    };
+    });
     this.displayForm = true;
   }
 
   onUpdateForm(id: number, name: string) {
     this.onUpdate = true;
     this.displayForm = true;
-    this.tagForm.id = id;
-    this.tagForm.name = name;
+    this.tagForm.setValue({
+      id: id,
+      name: name,
+    });
   }
   onDelete(id: number, name: string) {
     this.deleteForm = true;
-    this.tagForm.id = id;
-    this.tagForm.name = name;
+    this.tagForm.setValue({
+      id: id,
+      name: name,
+    });
   }
 
   createTag() {
-    const { name } = this.tagForm;
-    this.tagService.createTag(name).subscribe({
-      next: (res) => {
-        this.getList();
-        this.showSuccess('Tạo danh mục thành công!');
-        this.displayForm = false;
-      },
-      error: (err) => {
-        this.showError(err.message);
-      },
-    });
+    this.submitted = true;
+    const name = this.tagForm.get('name')?.value || '';
+    if (this.tagForm.valid) {
+      this.tagService.createTag(name).subscribe({
+        next: (res) => {
+          this.getList();
+          this.showSuccess('Tạo danh mục thành công!');
+          this.displayForm = false;
+          this.submitted = false;
+        },
+        error: (err) => {
+          this.showError(err.message);
+          this.submitted = false;
+        },
+      });
+    }
   }
 
   updateTag() {
-    const { id, name } = this.tagForm;
-    this.tagService.updateTag(id, name).subscribe({
-      next: (res) => {
-        this.getList();
-        this.showSuccess('Cập nhật danh mục thành công!');
-        this.displayForm = false;
-      },
-      error: (err) => {
-        this.showError(err.message);
-      },
-    });
+    this.submitted = true;
+    const id = this.tagForm.get('id')?.value || 0;
+    const name = this.tagForm.get('name')?.value || '';
+    if (this.tagForm.valid) {
+      this.tagService.updateTag(id, name).subscribe({
+        next: (res) => {
+          this.getList();
+          this.showSuccess('Cập nhật danh mục thành công!');
+          this.displayForm = false;
+          this.submitted = false;
+        },
+        error: (err) => {
+          this.showError(err.message);
+          this.submitted = false;
+        },
+      });
+    }
   }
 
   enableTag(id: number) {
@@ -113,17 +131,22 @@ export class TagComponent implements OnInit {
   }
 
   deleteTag() {
-    const { id } = this.tagForm;
-    this.tagService.deleteTag(id).subscribe({
-      next: (res) => {
-        this.getList();
-        this.showWarn('Xóa danh mục thành công!!');
-        this.deleteForm = false;
-      },
-      error: (err) => {
-        this.showError(err.message);
-      },
-    });
+    this.submitted = true;
+    const id = this.tagForm.get('id')?.value || 0;
+    if (this.tagForm.valid) {
+      this.tagService.deleteTag(id).subscribe({
+        next: (res) => {
+          this.getList();
+          this.showWarn('Xóa danh mục thành công!!');
+          this.deleteForm = false;
+          this.submitted = false;
+        },
+        error: (err) => {
+          this.showError(err.message);
+          this.submitted = false;
+        },
+      });
+    }
   }
 
   showSuccess(text: string) {

@@ -58,7 +58,7 @@ export class ProductService {
   createProduct(
     name: string,
     description: string,
-    price: string,
+    price: number,
     quantity: number,
     unit: string,
     categoryId: number,
@@ -75,7 +75,7 @@ export class ProductService {
     id: number,
     name: string,
     description: string,
-    price: string,
+    price: number,
     quantity: number,
     unit: string,
     categoryId: number,

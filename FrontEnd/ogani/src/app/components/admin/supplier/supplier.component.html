@@ -18,24 +18,43 @@
     [modal]="true"
     [transitionOptions]="'.3s'"
   >
-    <form action="">
+    <form action="" [formGroup]="supplierForm">
       <div class="p-field">
         <label for="name">Tên nhà cung cấp: </label>
         <input
+          class="form-control"
           type="text"
           pInputText
           class="w-full"
-          [(ngModel)]="supplierForm.name"
+          formControlName="name"
           name="name"
+          [ngClass]="{
+            'is-invalid': submitted && supplierForm.get('name')?.invalid
+          }"
         />
+        <div
+          class="invalid-feedback"
+          *ngIf="submitted && supplierForm.get('name')?.invalid"
+        >
+          <div *ngIf="supplierForm.get('name')?.errors?.['required']">
+            Yêu lòng nhập tên nhà cung cấp
+          </div>
+          <div *ngIf="supplierForm.get('name')?.errors?.['minlength']">
+            Độ dài tối thiểu phải là 5
+          </div>
+          <div *ngIf="supplierForm.get('name')?.errors?.['maxlength']">
+            Độ dài tối đa phải là 50
+          </div>
+        </div>
       </div>
       <div class="p-field">
         <label for="phone">Số điện thoại: </label>
         <input
           type="text"
+          class="form-control"
           pInputText
           class="w-full"
-          [(ngModel)]="supplierForm.phone"
+          formControlName="phone"
           name="phone"
         />
       </div>
@@ -43,9 +62,10 @@
         <label for="address">Địa chỉ: </label>
         <input
           type="text"
+          class="form-control"
           pInputText
           class="w-full"
-          [(ngModel)]="supplierForm.address"
+          formControlName="address"
           name="address"
         />
       </div>
@@ -53,11 +73,29 @@
         <label for="email">Email: </label>
         <input
           type="text"
+          class="form-control"
           pInputText
           class="w-full"
-          [(ngModel)]="supplierForm.email"
+          formControlName="email"
           name="email"
+          [ngClass]="{
+            'is-invalid': submitted && supplierForm.get('email')?.invalid
+          }"
         />
+        <div
+          class="invalid-feedback"
+          *ngIf="submitted && supplierForm.get('email')?.invalid"
+        >
+          <div *ngIf="supplierForm.get('email')?.errors?.['required']">
+            Yêu lòng nhập email của nhà cung cấp
+          </div>
+          <div *ngIf="supplierForm.get('email')?.errors?.['minlength']">
+            Độ dài tối thiểu phải là 5
+          </div>
+          <div *ngIf="supplierForm.get('email')?.errors?.['maxlength']">
+            Độ dài tối đa phải là 30
+          </div>
+        </div>
       </div>
       <div class="p-field mt-3">
         <button
@@ -183,7 +221,8 @@
   <div>
     <i class="pi pi pi-exclamation-triangle"></i>
     <span class="ml-2"
-      >Bạn có chắc xóa nhà cung cấp <span>{{ supplierForm.name }}</span> ?</span
+      >Bạn có chắc xóa nhà cung cấp
+      <span>{{ supplierForm.get("name")?.value }}</span> ?</span
     >
   </div>
   <div class="flex justify-content-end mt-3">

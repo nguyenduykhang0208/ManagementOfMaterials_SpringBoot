@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { CategoryService } from 'src/app/_service/category.service';
 import { ImageService } from 'src/app/_service/image.service';
@@ -29,16 +30,25 @@ export class ProductComponent implements OnInit {
   showForm: boolean = false;
   showImage: boolean = false;
   showDelete: boolean = false;
-
-  productForm: any = {
-    name: null,
-    description: null,
-    price: null,
-    quantity: null,
-    unit: null,
-    categoryId: null,
-    imageIds: [],
-  };
+  submitted = false;
+  productForm = new FormGroup({
+    id: new FormControl(0),
+    name: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(50),
+    ]),
+    description: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(1000),
+    ]),
+    price: new FormControl(0, [Validators.required, Validators.min(0)]),
+    quantity: new FormControl(0, [Validators.required, Validators.min(0)]),
+    unit: new FormControl('', [Validators.required]),
+    categoryId: new FormControl(0),
+    imageIds: new FormControl([]),
+  });
 
   constructor(
     private messageService: MessageService,
@@ -62,30 +72,24 @@ export class ProductComponent implements OnInit {
   openNew() {
     this.onUpdate = false;
     this.showForm = true;
+    this.submitted = false;
     this.listImageChoosen = [];
-    this.productForm = {
-      id: null,
-      name: null,
-      description: null,
-      price: null,
-      quantity: null,
-      unit: null,
-      categoryId: null,
-      imageIds: [],
-    };
+    this.productForm.reset();
   }
 
   openUpdate(data: any) {
     this.listImageChoosen = [];
     this.onUpdate = true;
     this.showForm = true;
-    this.productForm.id = data.id;
-    this.productForm.name = data.name;
-    this.productForm.description = data.description;
-    this.productForm.price = data.price;
-    this.productForm.quantity = data.quantity;
-    this.productForm.unit = data.unit;
-    this.productForm.categoryId = data.category.id;
+    this.productForm.patchValue({
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      quantity: data.quantity,
+      unit: data.unit,
+      categoryId: data.category.id,
+    });
     data.images.forEach((res: any) => {
       this.listImageChoosen.push(res);
     });
@@ -153,72 +157,80 @@ export class ProductComponent implements OnInit {
   }
 
   createProduct() {
+    this.submitted = true;
     let data = this.listImageChoosen;
-    data.forEach((res: any) => {
-      this.productForm.imageIds.push(res.id);
-    });
-    const { name, description, price, quantity, unit, categoryId, imageIds } =
-      this.productForm;
+    this.productForm.get('imageIds')?.setValue(data.map((res: any) => res.id));
+    const name = this.productForm.get('name')?.value || '';
+    const description = this.productForm.get('description')?.value || '';
+    const price = this.productForm.get('price')?.value || 0;
+    const quantity = this.productForm.get('quantity')?.value || 0;
+    const unit = this.productForm.get('unit')?.value || '';
+    const categoryId = this.productForm.get('categoryId')?.value || 0;
+    const imageIds = this.productForm.get('imageIds')?.value || [];
     console.log(this.productForm);
-    this.productService
-      .createProduct(
-        name,
-        description,
-        price,
-        quantity,
-        unit,
-        categoryId,
-        imageIds
-      )
-      .subscribe({
-        next: (res) => {
-          this.getListProduct();
-          this.showForm = false;
-          this.showSuccess('Thêm mới thành công');
-        },
-        error: (err) => {
-          this.showError(err.message);
-        },
-      });
+    if (this.productForm.valid) {
+      this.productService
+        .createProduct(
+          name,
+          description,
+          price,
+          quantity,
+          unit,
+          categoryId,
+          imageIds
+        )
+        .subscribe({
+          next: (res) => {
+            this.getListProduct();
+            this.showForm = false;
+            this.showSuccess('Thêm mới thành công');
+            this.submitted = false;
+          },
+          error: (err) => {
+            this.showError(err.message);
+            this.submitted = false;
+          },
+        });
+    }
   }
 
   updateProduct() {
+    this.submitted = true;
     let data = this.listImageChoosen;
-    data.forEach((res: any) => {
-      this.productForm.imageIds.push(res.id);
-    });
-    const {
-      id,
-      name,
-      description,
-      price,
-      quantity,
-      unit,
-      categoryId,
-      imageIds,
-    } = this.productForm;
-    console.log(this.productForm);
-    this.productService
-      .updateProduct(
-        id,
-        name,
-        description,
-        price,
-        quantity,
-        unit,
-        categoryId,
-        imageIds
-      )
-      .subscribe({
-        next: (res) => {
-          this.getListProduct();
-          this.showForm = false;
-          this.showSuccess('Cập nhật thành công');
-        },
-        error: (err) => {
-          this.showError(err.message);
-        },
-      });
+    this.productForm.get('imageIds')?.setValue(data.map((res: any) => res.id));
+    const id = this.productForm.get('id')?.value || 0;
+    const name = this.productForm.get('name')?.value || '';
+    const description = this.productForm.get('description')?.value || '';
+    const price = this.productForm.get('price')?.value || 0;
+    const quantity = this.productForm.get('quantity')?.value || 0;
+    const unit = this.productForm.get('unit')?.value || '';
+    const categoryId = this.productForm.get('categoryId')?.value || 0;
+    const imageIds = this.productForm.get('imageIds')?.value || [];
+    if (this.productForm.valid) {
+      this.productService
+        .updateProduct(
+          id,
+          name,
+          description,
+          price,
+          quantity,
+          unit,
+          categoryId,
+          imageIds
+        )
+        .subscribe({
+          next: (res) => {
+            this.getListProduct();
+            this.showForm = false;
+            this.showSuccess('Cập nhật thành công');
+            this.submitted = false;
+          },
+          error: (err) => {
+            this.showError(err.message);
+            this.submitted = false;
+          },
+        });
+    }
   }
 
   enableProdcut(id: number) {
@@ -234,14 +246,19 @@ export class ProductComponent implements OnInit {
   }
 
   onDelete(id: number, name: string) {
-    this.productForm.id = null;
+    this.productForm.patchValue({
+      id: 0,
+    });
     this.showDelete = true;
-    this.productForm.id = id;
-    this.productForm.name = name;
+    this.productForm.patchValue({
+      id: id,
+      name: name,
+    });
   }
 
   deleteProduct() {
-    this.productService.deleteProduct(this.productForm.id).subscribe({
+    const id = this.productForm.get('id')?.value || 0;
+    this.productService.deleteProduct(id).subscribe({
       next: (res) => {
         this.getListProduct();
         this.showWarn('Xóa thành công');

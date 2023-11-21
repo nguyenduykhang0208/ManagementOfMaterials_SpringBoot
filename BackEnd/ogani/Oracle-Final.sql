@@ -10,6 +10,7 @@ CREATE TABLE users (
   address VARCHAR2(255),
   phone VARCHAR2(255),
   verification_code VARCHAR2(64),
+  town VARCHAR2(255),
   enable NUMBER(1, 0),
   CONSTRAINT users_pk PRIMARY KEY (id),
     CONSTRAINT users_username_uk UNIQUE (username),
@@ -40,7 +41,6 @@ CREATE TABLE category (
   enable NUMBER(1,0),
   CONSTRAINT category_pk PRIMARY KEY (id)
 );
-INSERT INTO category (name, enable) VALUES ('Fresh Meat', 1);
 
 CREATE TABLE product (
   id NUMBER(19, 0) GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -108,11 +108,6 @@ CREATE TABLE importcoupon_detail(
     CONSTRAINT importcoupon_detail_fk FOREIGN KEY( importcoupon_id ) REFERENCES importcoupon( id ) ON DELETE CASCADE,
     CONSTRAINT importcoupon_detail_product_fk FOREIGN KEY( product_id ) REFERENCES product( id ) ON DELETE CASCADE
 );
-
-CreateImportCouponDetailRequest
-ImportCouponDetailRepository
-ImportCouponServiceImpl
-ImportCouponController
 
 CREATE TABLE blog (
   id NUMBER(19, 0) GENERATED ALWAYS AS IDENTITY NOT NULL,

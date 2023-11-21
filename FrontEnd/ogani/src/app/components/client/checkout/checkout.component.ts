@@ -17,6 +17,9 @@ import { ProductService } from 'src/app/_service/product.service';
 import { StorageService } from 'src/app/_service/storage.service';
 import { UserService } from 'src/app/_service/user.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { VNPayService } from 'src/app/_service/vnpay.service';
+import { ActivatedRoute } from '@angular/router';
+import { OrderInfoService } from 'src/app/_service/order-info.service';
 
 @Component({
   selector: 'app-checkout',
@@ -35,6 +38,8 @@ export class CheckoutComponent implements OnInit {
   username!: string;
   userId: any;
   submitted = false;
+  total: number = 0;
+  paymentStatus: any;
 
   // orderForm: any = {
   //   firstname: null,
@@ -72,20 +77,27 @@ export class CheckoutComponent implements OnInit {
 
   constructor(
     public cartService: CartService,
+    public orderInfoService: OrderInfoService,
     private orderService: OrderService,
+    private vnpayService: VNPayService,
     private storageService: StorageService,
     private userService: UserService,
     private productService: ProductService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
   ngOnInit(): void {
     this.username = this.storageService.getUser().username;
     this.userId = this.storageService.getUser().id;
     this.getUserInfor();
     this.cartService.getItems();
+    this.total = this.cartService.total;
     console.log(this.cartService.getItems());
-    // console.log(this.username);
+    this.paymentStatus = this.route.snapshot.queryParams['paymentStatus'];
+    if (this.paymentStatus === 'success') {
+      this.actionPlaceOrder();
+    }
   }
 
   getUserInfor() {
@@ -121,6 +133,54 @@ export class CheckoutComponent implements OnInit {
 
   placeOrder() {
     this.submitted = true;
+    const firstname = this.orderForm.get('firstname')?.value || '';
+    const lastname = this.orderForm.get('lastname')?.value || '';
+    const country = this.orderForm.get('country')?.value || '';
+    const address = this.orderForm.get('address')?.value || '';
+    const town = this.orderForm.get('town')?.value || '';
+    const state = this.orderForm.get('state')?.value || '';
+    const postCode = this.orderForm.get('postCode')?.value || '';
+    const phone = this.orderForm.get('phone')?.value || '';
+    const email = this.orderForm.get('email')?.value || '';
+    const note = this.orderForm.get('note')?.value || '';
+    if (this.orderForm.valid) {
+      this.orderInfoService.saveChange(
+        firstname,
+        lastname,
+        country,
+        address,
+        town,
+        state,
+        postCode,
+        phone,
+        email,
+        note
+      );
+      this.vnpayService.createPayment(this.total).subscribe({
+        next: (res) => {
+          window.location.href = res.toString();
+          const urlParams = new URLSearchParams(window.location.search);
+        },
+        error: (err) => {
+          console.log(err);
+        },
+      });
+    }
+  }
+
+  actionPlaceOrder() {
+    // this.listOrderDetail = [];
+    const orderInfo = this.orderInfoService.getItems() as any;
+    const firstname = orderInfo.firstname;
+    const lastname = orderInfo.lastname;
+    const country = orderInfo.country;
+    const address = orderInfo.address;
+    const town = orderInfo.town;
+    const state = orderInfo.state;
+    const postCode = orderInfo.postCode;
+    const phone = orderInfo.phone;
+    const email = orderInfo.email;
+    const note = orderInfo.note;
     this.cartService.items.forEach((res) => {
       let orderDetail: OrderDetail = new OrderDetail();
       orderDetail.productId = res.id;
@@ -130,67 +190,43 @@ export class CheckoutComponent implements OnInit {
       orderDetail.subTotal = res.subTotal;
       this.listOrderDetail.push(orderDetail);
     });
-    from(this.listOrderDetail)
-      .pipe(
-        concatMap((item: any) => {
-          return this.productService.updateQuantityProduct(
-            item.productId,
-            -item.quantity
-          );
-        })
+    this.orderService
+      .placeOrder(
+        firstname,
+        lastname,
+        country,
+        address,
+        town,
+        state,
+        postCode,
+        phone,
+        email,
+        note,
+        this.listOrderDetail,
+        this.username
       )
       .subscribe({
-        next: (res) => {},
-        error: (err) => {},
+        next: (res) => {
+          from(this.listOrderDetail)
+            .pipe(
+              concatMap((item: any) => {
+                return this.productService.updateQuantityProduct(
+                  item.productId,
+                  -item.quantity
+                );
+              })
+            )
+            .subscribe({
+              next: (res) => {},
+              error: (err) => {},
+            });
+          this.cartService.clearCart();
+          this.router.navigate(['/my-order']);
+        },
+        error: (err) => {
+          console.log(err);
+        },
       });
-    // const {
-    //   firstname,
-    //   lastname,
-    //   country,
-    //   address,
-    //   town,
-    //   state,
-    //   postCcode,
-    //   phone,
-    //   email,
-    //   note,
-    // } = this.orderForm;
-    const firstname = this.orderForm.get('firstname')?.value || '';
-    const lastname = this.orderForm.get('lastname')?.value || '';
-    const country = this.orderForm.get('country')?.value || '';
-    const address = this.orderForm.get('address')?.value || '';
-    const town = this.orderForm.get('town')?.value || '';
-    const state = this.orderForm.get('state')?.value || '';
-    const postCcode = this.orderForm.get('postCcode')?.value || '';
-    const phone = this.orderForm.get('phone')?.value || '';
-    const email = this.orderForm.get('email')?.value || '';
-    const note = this.orderForm.get('note')?.value || '';
-    if (this.orderForm.valid) {
-      this.orderService
-        .placeOrder(
-          firstname,
-          lastname,
-          country,
-          address,
-          town,
-          state,
-          postCcode,
-          phone,
-          email,
-          note,
-          this.listOrderDetail,
-          this.username
-        )
-        .subscribe({
-          next: (res) => {
-            this.cartService.clearCart();
-            this.router.navigate(['/']);
-          },
-          error: (err) => {
-            console.log(err);
-          },
-        });
-    }
   }
   showSuccess(text: string) {
     this.messageService.add({

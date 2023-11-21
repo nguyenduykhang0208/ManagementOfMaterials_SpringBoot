@@ -40,7 +40,7 @@ public class CategoryServiceImpl implements CategoryService {
         // TODO Auto-generated method stub
         Category category = categoryRepository.findById(id).orElseThrow(() -> new NotFoundException("Not Found Category With Id: " + id));
         category.setName(request.getName());
-        category.setEnable(1);
+        category.setEnable(0);
         categoryRepository.save(category);
         return category;
     }

@@ -1,26 +1,95 @@
 <div class="container" id="container">
   <div class="form-container sign-up-container">
-    <form action="#">
+    <form action="#" [formGroup]="registerForm" (ngSubmit)="register()">
       <h2>Tạo tài khoản</h2>
       <input
+        class="form-control"
         type="text"
+        pInputText
+        class="w-full"
         placeholder="Tên tài khoản"
-        [(ngModel)]="registerForm.username"
+        formControlName="username"
         name="username"
+        [ngClass]="{
+          'is-invalid':
+            submitted &&
+            registerForm.get('username')?.invalid &&
+            registerForm.get('username')?.touched
+        }"
       />
+      <div
+        class="invalid-feedback"
+        *ngIf="submitted && registerForm.get('username')?.invalid"
+      >
+        <div *ngIf="registerForm.get('username')?.errors?.['required']">
+          Yêu lòng nhập tài khoản của bạn
+        </div>
+        <div *ngIf="registerForm.get('username')?.errors?.['minlength']">
+          Độ dài tối thiểu phải là 5
+        </div>
+        <div *ngIf="registerForm.get('username')?.errors?.['maxlength']">
+          Độ dài tối đa phải là 30
+        </div>
+      </div>
       <input
+        class="form-control"
         type="email"
+        pInputText
+        class="w-full"
         placeholder="Email"
-        [(ngModel)]="registerForm.email"
+        formControlName="email"
         name="email"
+        [ngClass]="{
+          'is-invalid':
+            submitted &&
+            registerForm.get('email')?.invalid &&
+            registerForm.get('email')?.touched
+        }"
       />
+      <div
+        class="invalid-feedback"
+        *ngIf="submitted && registerForm.get('email')?.invalid"
+      >
+        <div *ngIf="registerForm.get('email')?.errors?.['required']">
+          Yêu lòng nhập Email
+        </div>
+        <div *ngIf="registerForm.get('email')?.errors?.['minlength']">
+          Độ dài tối thiểu phải là 5
+        </div>
+        <div *ngIf="registerForm.get('email')?.errors?.['maxlength']">
+          Độ dài tối đa phải là 30
+        </div>
+      </div>
       <input
+        class="form-control"
         type="password"
+        pPassword
+        class="w-full"
         placeholder="Mật khẩu"
-        [(ngModel)]="registerForm.password"
+        formControlName="password"
         name="password"
+        [ngClass]="{
+          'is-invalid':
+            submitted &&
+            registerForm.get('password')?.invalid &&
+            registerForm.get('password')?.touched
+        }"
       />
-      <button (click)="register()">Đăng ký</button>
+      <div
+        class="invalid-feedback"
+        *ngIf="submitted && registerForm.get('password')?.invalid"
+      >
+        <div *ngIf="registerForm.get('password')?.errors?.['required']">
+          Yêu lòng nhập mật khẩu
+        </div>
+        <div *ngIf="registerForm.get('password')?.errors?.['minlength']">
+          Độ dài tối thiểu phải là 5
+        </div>
+        <div *ngIf="registerForm.get('password')?.errors?.['maxlength']">
+          Độ dài tối đa phải là 30
+        </div>
+      </div>
+      <button>Đăng ký</button>
     </form>
   </div>
   <div class="form-container sign-in-container">

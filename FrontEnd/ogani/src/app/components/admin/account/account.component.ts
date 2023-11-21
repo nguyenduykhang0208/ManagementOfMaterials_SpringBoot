@@ -3,7 +3,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { AuthService } from 'src/app/_service/auth.service';
 import { StorageService } from 'src/app/_service/storage.service';
 import { UserService } from 'src/app/_service/user.service';
-
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 @Component({
   selector: 'app-account',
   templateUrl: './account.component.html',
@@ -14,14 +14,29 @@ export class AccountComponent implements OnInit {
   listUser: any;
   showDelete: boolean = false;
   showForm: boolean = false;
+  submitted = false;
   userId: any;
   userRole: any;
-  userForm: any = {
-    id: null,
-    username: null,
-    email: null,
-    password: null,
-  };
+
+  userForm = new FormGroup({
+    id: new FormControl(0),
+    username: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(30),
+    ]),
+    email: new FormControl('', [
+      Validators.required,
+      Validators.email,
+      Validators.minLength(5),
+      Validators.maxLength(30),
+    ]),
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(30),
+    ]),
+  });
 
   constructor(
     private userService: UserService,
@@ -68,39 +83,42 @@ export class AccountComponent implements OnInit {
 
   openNew() {
     this.showForm = true;
-    this.userForm = {
-      id: null,
+    this.submitted = false;
+    this.userForm.patchValue({
       username: null,
       email: null,
       password: null,
-    };
+    });
   }
 
   createAccount() {
-    console.log(this.userForm);
-    this.authService
-      .register(
-        this.userForm.username,
-        this.userForm.email,
-        this.userForm.password
-      )
-      .subscribe({
+    this.submitted = true;
+    const username = this.userForm.get('username')?.value || '';
+    const email = this.userForm.get('email')?.value || '';
+    const password = this.userForm.get('password')?.value || '';
+    if (this.userForm.valid) {
+      this.authService.register(username, email, password).subscribe({
         next: (res) => {
           this.getListUser();
           this.showSuccess('Đăng ký thành công');
           this.getListUser();
           this.showForm = false;
+          this.submitted = false;
         },
         error: (err) => {
           this.showError(err.message);
+          this.submitted = false;
         },
       });
+    }
   }
 
   onDelete(id: number, username: string) {
     this.showDelete = true;
-    this.userForm.id = id;
-    this.userForm.username = username;
+    this.userForm.patchValue({
+      id: id,
+      username: username,
+    });
   }
 
   showSuccess(text: string) {
@@ -112,7 +130,8 @@ export class AccountComponent implements OnInit {
   }
 
   deleteUser() {
-    this.userService.deleteUser(this.userForm.id).subscribe({
+    const id = this.userForm.get('id')?.value || 0;
+    this.userService.deleteUser(id).subscribe({
       next: (res) => {
         this.getListUser();
         this.showWarn('Xóa thành công');

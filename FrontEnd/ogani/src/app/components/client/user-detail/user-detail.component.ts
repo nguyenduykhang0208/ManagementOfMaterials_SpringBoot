@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { AuthService } from 'src/app/_service/auth.service';
@@ -18,6 +19,8 @@ export class UserDetailComponent implements OnInit {
 
   changePassword: boolean = false;
 
+  submitted = false;
+
   updateForm: any = {
     firstname: null,
     lastname: null,
@@ -29,10 +32,24 @@ export class UserDetailComponent implements OnInit {
     phone: null,
   };
 
-  changePasswordForm: any = {
-    oldPassword: null,
-    newPassword: null,
-  };
+  // changePasswordForm: any = {
+  //   oldPassword: null,
+  //   newPassword: null,
+  // };
+
+  changePasswordForm = new FormGroup({
+    oldPassword: new FormControl('', [Validators.required]),
+    newPassword: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(30),
+    ]),
+    newPasswordConfim: new FormControl('', [
+      Validators.required,
+      Validators.minLength(5),
+      Validators.maxLength(30),
+    ]),
+  });
 
   constructor(
     private storageService: StorageService,
@@ -95,27 +112,36 @@ export class UserDetailComponent implements OnInit {
   }
 
   changePasswordFunc() {
-    const { oldPassword, newPassword } = this.changePasswordForm;
-    this.userService
-      .changePassword(this.username, oldPassword, newPassword)
-      .subscribe({
-        next: (res) => {
-          this.getUser();
-          this.showWarn('Thay đổi mật khẩu thành công! Vui lòng đăng nhập lại');
-          this.authService.logout().subscribe({
-            next: (res) => {
-              this.storageService.clean();
-              this.router.navigate(['/']);
-            },
-            error: (err) => {
-              this.showError(err.message);
-            },
-          });
-        },
-        error: (err) => {
-          console.log(err);
-        },
-      });
+    // const { oldPassword, newPassword } = this.changePasswordForm;
+    this.submitted = true;
+    const oldPassword = this.changePasswordForm.get('oldPassword')?.value || '';
+    const newPassword = this.changePasswordForm.get('newPassword')?.value || '';
+    const newPasswordConfim =
+      this.changePasswordForm.get('newPasswordConfim')?.value || '';
+    if (this.changePasswordForm.valid && newPassword === newPasswordConfim) {
+      this.userService
+        .changePassword(this.username, oldPassword, newPassword)
+        .subscribe({
+          next: (res) => {
+            this.getUser();
+            this.showWarn(
+              'Thay đổi mật khẩu thành công! Vui lòng đăng nhập lại'
+            );
+            this.authService.logout().subscribe({
+              next: (res) => {
+                this.storageService.clean();
+                this.router.navigate(['/']);
+              },
+              error: (err) => {
+                this.showError(err.message);
+              },
+            });
+          },
+          error: (err) => {
+            console.log(err);
+          },
+        });
+    }
   }
 
   showChangePassword() {
